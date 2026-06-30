@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Services — LocalAWS</title>
+<style>
+  :root { --bg:#0e1117; --panel:#161b22; --border:#2a313c; --text:#d6dde5; --muted:#8b94a3; --accent:#ff9900; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:16px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .logo { width:28px; height:28px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:800; color:#161616; font-size:13px; }
+  header h1 { font-size: 15px; margin: 0; }
+  .userinfo { margin-left: auto; display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--muted); }
+  .userinfo button { background: none; border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+  .userinfo button:hover { border-color: var(--accent); }
+
+  main { max-width: 880px; margin: 50px auto; padding: 0 24px; }
+  main h2 { font-size: 20px; margin-bottom: 4px; }
+  main .sub { color: var(--muted); font-size: 13px; margin-bottom: 32px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 22px; text-decoration: none; color: var(--text);
+    display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
+    transition: border-color 0.15s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .icon-box {
+    width: 44px; height: 44px; border-radius: 8px; display:flex; align-items:center; justify-content:center;
+    font-weight: 800; font-size: 14px; color: #161616;
+  }
+  .card h3 { margin: 0; font-size: 15px; }
+  .card p { margin: 0; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">L</div>
+  <h1>LocalAWS Console</h1>
+  <div class="userinfo">
+    <span>{{ email }}</span>
+    <button onclick="logout()">Sign out</button>
+  </div>
+</header>
+<main>
+  <h2>Services</h2>
+  <div class="sub">Choose a service to get started</div>
+  <div class="grid">
+    <a class="card" href="/s3console">
+      <div class="icon-box" style="background:#3fb950">S3</div>
+      <h3>S3</h3>
+      <p>Simple storage for buckets and objects</p>
+    </a>
+    <a class="card" href="/coming-soon/ec2">
+      <div class="icon-box" style="background:#ff9900">EC2</div>
+      <h3>EC2</h3>
+      <p>Virtual compute instances</p>
+    </a>
+    <a class="card" href="/coming-soon/lambda">
+      <div class="icon-box" style="background:#e5534b">λ</div>
+      <h3>Lambda</h3>
+      <p>Run code without managing servers</p>
+    </a>
+    <a class="card" href="/coming-soon/dynamodb">
+      <div class="icon-box" style="background:#4da3ff">DB</div>
+      <h3>DynamoDB</h3>
+      <p>Managed NoSQL database</p>
+    </a>
+  </div>
+</main>
+<script>
+async function logout() {
+  await fetch("/api/logout", { method: "POST", credentials: "include" });
+  window.location.href = "/";
+}
+</script>
+</body>
+</html>

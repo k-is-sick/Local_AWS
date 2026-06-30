@@ -3,7 +3,34 @@ services:
     build: .
     environment:
       - PYTHONUNBUFFERED=1
+      - DB_HOST=db
+      - DB_NAME=localaws
+      - DB_USER=localaws
+      - DB_PASSWORD=localaws
+      - SECRET_KEY=change-this-secret
     ports:
       - "4566:4566"
     volumes:
       - "./storage:/app/storage"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=localaws
+      - POSTGRES_USER=localaws
+      - POSTGRES_PASSWORD=localaws
+    ports:
+      - "5432:5432"
+    volumes:
+      - "pgdata:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U localaws"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
