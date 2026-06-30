@@ -1,0 +1,9 @@
+services:
+  minis3:
+    build: .
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "4566:4566"
+    volumes:
+      - "./storage:/app/storage"
