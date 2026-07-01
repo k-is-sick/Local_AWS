@@ -1,0 +1,14 @@
+services:
+  miniec2:
+    build: .
+    ports:
+      - "4567:4567"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - ministack
+
+networks:
+  ministack:
+    name: ministack
+    external: true
