@@ -12,6 +12,7 @@ services:
       - "4566:4566"
     volumes:
       - "./storage:/app/storage"
+      - "./dynamodb_data:/app/dynamodb_data"
     depends_on:
       db:
         condition: service_healthy

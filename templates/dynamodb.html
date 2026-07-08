@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DynamoDB — LocalAWS</title>
+<style>
+  :root {
+    --bg:#0e1117; --panel:#161b22; --border:#2a313c;
+    --text:#d6dde5; --muted:#8b94a3; --accent:#4da3ff;
+    --danger:#e5534b; --ok:#3fb950;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:16px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .logo { width:28px; height:28px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:11px; }
+  header h1 { font-size:15px; margin:0; }
+  header a { color:var(--muted); text-decoration:none; font-size:13px; margin-left:20px; }
+  main { max-width:1000px; margin:30px auto; padding:0 24px; display:grid; grid-template-columns:260px 1fr; gap:20px; }
+  .panel { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:16px; }
+  .panel h2 { font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 12px; }
+  input,textarea { width:100%; padding:8px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:13px; margin-bottom:8px; }
+  textarea { height:80px; resize:vertical; font-family:monospace; }
+  button { padding:8px 14px; border-radius:6px; border:1px solid var(--border); color:var(--text); background:var(--panel); font-size:13px; cursor:pointer; width:100%; margin-bottom:6px; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  button.danger { color:var(--danger); }
+  button.danger:hover { border-color:var(--danger); }
+  button:hover { border-color:var(--accent); }
+  .table-list { margin-top:8px; }
+  .table-item { padding:8px 10px; border-radius:6px; cursor:pointer; font-size:13px; display:flex; justify-content:space-between; align-items:center; }
+  .table-item:hover,.table-item.active { background:var(--border); }
+  .table-item .del { color:var(--danger); font-size:11px; cursor:pointer; opacity:0; }
+  .table-item:hover .del { opacity:1; }
+  .right-panel h2 { font-size:15px; margin:0 0 4px; }
+  .right-panel .meta { color:var(--muted); font-size:12px; margin-bottom:16px; }
+  .toolbar { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .toolbar input { margin:0; width:auto; flex:1; }
+  .toolbar button { width:auto; margin:0; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); padding:8px 10px; border-bottom:1px solid var(--border); }
+  td { padding:9px 10px; border-bottom:1px solid var(--border); }
+  tr:hover td { background:var(--panel); }
+  .empty { color:var(--muted); text-align:center; padding:32px; font-size:13px; }
+  .status { font-size:12px; min-height:16px; margin-top:10px; }
+  .status.ok { color:var(--ok); }
+  .status.error { color:var(--danger); }
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); align-items:center; justify-content:center; z-index:50; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--panel); border:1px solid var(--border); border-radius:8px; width:480px; max-width:90vw; padding:24px; }
+  .modal h3 { margin:0 0 14px; font-size:15px; }
+  .modal-footer { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
+  .modal-footer button { width:auto; margin:0; }
+  label { font-size:12px; color:var(--muted); display:block; margin-bottom:4px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">DB</div>
+  <h1>LocalAWS — DynamoDB</h1>
+  <a href="/services">← Services</a>
+</header>
+
+<main>
+  <!-- LEFT: table list + create -->
+  <div>
+    <div class="panel" style="margin-bottom:16px;">
+      <h2>Create Table</h2>
+      <label>Table name</label>
+      <input type="text" id="newTableName" placeholder="e.g. users">
+      <label>Partition key</label>
+      <input type="text" id="newPK" placeholder="e.g. user_id">
+      <label>Sort key (optional)</label>
+      <input type="text" id="newSK" placeholder="e.g. created_at">
+      <button class="primary" onclick="createTable()">Create table</button>
+      <div class="status" id="createStatus"></div>
+    </div>
+    <div class="panel">
+      <h2>Tables</h2>
+      <div class="table-list" id="tableList">
+        <div class="empty">No tables yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: table view -->
+  <div class="panel right-panel" id="rightPanel" style="display:none;">
+    <h2 id="tableTitle"></h2>
+    <div class="meta" id="tableMeta"></div>
+    <div class="toolbar">
+      <button class="primary" onclick="openPutModal()">+ Put item</button>
+      <input type="text" id="getKeyInput" placeholder="Partition key value to get">
+      <button onclick="getItem()">Get item</button>
+      <button onclick="scanItems()">Scan all</button>
+    </div>
+    <table>
+      <thead><tr id="itemsHead"></tr></thead>
+      <tbody id="itemsBody"></tbody>
+    </table>
+    <div class="empty" id="itemsEmpty" style="display:none;"></div>
+    <div class="status" id="tableStatus"></div>
+  </div>
+</main>
+
+<!-- Put Item Modal -->
+<div class="modal-overlay" id="putModal">
+  <div class="modal">
+    <h3>Put Item</h3>
+    <label>JSON item</label>
+    <textarea id="putItemJson" placeholder='{"user_id":"1","name":"Yash"}'></textarea>
+    <div class="status" id="putStatus"></div>
+    <div class="modal-footer">
+      <button onclick="closePutModal()">Cancel</button>
+      <button class="primary" onclick="putItem()">Save item</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentTable = null;
+let currentMeta = null;
+
+async function api(path, options={}) {
+  options.credentials = "include";
+  const res = await fetch("/api/dynamodb" + path, options);
+  return res;
+}
+
+function setStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = "status" + (type ? " " + type : "");
+}
+
+async function loadTables() {
+  const res = await api("/tables");
+  const data = await res.json();
+  const el = document.getElementById("tableList");
+  if (!data.tables || data.tables.length === 0) {
+    el.innerHTML = `<div class="empty">No tables yet</div>`;
+    return;
+  }
+  el.innerHTML = data.tables.map(t => `
+    <div class="table-item ${t === currentTable ? 'active' : ''}" onclick="openTable('${t}')">
+      <span>▤ ${t}</span>
+      <span class="del" onclick="event.stopPropagation(); deleteTable('${t}')">✕ Delete</span>
+    </div>`).join("");
+}
+
+async function createTable() {
+  const name = document.getElementById("newTableName").value.trim();
+  const pk = document.getElementById("newPK").value.trim();
+  const sk = document.getElementById("newSK").value.trim();
+  if (!name || !pk) { setStatus("createStatus", "Table name and partition key required", "error"); return; }
+  const res = await api("/tables", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({table_name: name, partition_key: pk, sort_key: sk || null})
+  });
+  const data = await res.json();
+  if (!res.ok) { setStatus("createStatus", data.error, "error"); return; }
+  setStatus("createStatus", "Table created: " + name, "ok");
+  document.getElementById("newTableName").value = "";
+  document.getElementById("newPK").value = "";
+  document.getElementById("newSK").value = "";
+  loadTables();
+  openTable(name);
+}
+
+async function deleteTable(name) {
+  if (!confirm(`Delete table "${name}"? All items will be lost.`)) return;
+  await api(`/tables/${name}`, {method: "DELETE"});
+  if (currentTable === name) {
+    currentTable = null;
+    document.getElementById("rightPanel").style.display = "none";
+  }
+  loadTables();
+}
+
+async function openTable(name) {
+  currentTable = name;
+  const res = await api(`/tables/${name}`);
+  const data = await res.json();
+  currentMeta = data.meta;
+  document.getElementById("rightPanel").style.display = "block";
+  document.getElementById("tableTitle").textContent = name;
+  const sk = data.meta.sort_key ? ` + ${data.meta.sort_key} (sort)` : "";
+  document.getElementById("tableMeta").textContent =
+    `Partition key: ${data.meta.partition_key}${sk} · ${data.count} item(s)`;
+  loadTables();
+  scanItems();
+}
+
+async function scanItems() {
+  const res = await api(`/tables/${currentTable}/scan`);
+  const data = await res.json();
+  renderItems(data.items);
+  setStatus("tableStatus", `${data.count} item(s) found`, "");
+}
+
+async function getItem() {
+  const key = document.getElementById("getKeyInput").value.trim();
+  if (!key) { scanItems(); return; }
+  const res = await api(`/tables/${currentTable}/items/${encodeURIComponent(key)}`);
+  const data = await res.json();
+  if (!res.ok) { setStatus("tableStatus", data.error, "error"); renderItems([]); return; }
+  renderItems([data.item]);
+  setStatus("tableStatus", "Item found", "ok");
+}
+
+function renderItems(items) {
+  const head = document.getElementById("itemsHead");
+  const body = document.getElementById("itemsBody");
+  const empty = document.getElementById("itemsEmpty");
+  if (!items || items.length === 0) {
+    head.innerHTML = "";
+    body.innerHTML = "";
+    empty.style.display = "block";
+    empty.textContent = "No items found.";
+    return;
+  }
+  empty.style.display = "none";
+  const cols = [...new Set(items.flatMap(i => Object.keys(i)))];
+  head.innerHTML = cols.map(c => `<th>${c}</th>`).join("") + `<th></th>`;
+  body.innerHTML = items.map(item => {
+    const pk = currentMeta.partition_key;
+    const sk = currentMeta.sort_key;
+    const key = sk ? `${item[pk]}#${item[sk] || ""}` : item[pk];
+    const cells = cols.map(c => `<td>${item[c] ?? ""}</td>`).join("");
+    return `<tr>${cells}<td><button class="danger" style="width:auto;padding:4px 8px;font-size:11px;" onclick="deleteItem('${key}')">Delete</button></td></tr>`;
+  }).join("");
+}
+
+async function deleteItem(key) {
+  if (!confirm(`Delete item "${key}"?`)) return;
+  await api(`/tables/${currentTable}/items/${encodeURIComponent(key)}`, {method: "DELETE"});
+  setStatus("tableStatus", "Item deleted", "ok");
+  scanItems();
+}
+
+function openPutModal() {
+  if (!currentMeta) return;
+  const example = {[currentMeta.partition_key]: "value"};
+  if (currentMeta.sort_key) example[currentMeta.sort_key] = "value";
+  document.getElementById("putItemJson").value = JSON.stringify(example, null, 2);
+  document.getElementById("putModal").classList.add("open");
+}
+
+function closePutModal() {
+  document.getElementById("putModal").classList.remove("open");
+  setStatus("putStatus", "", "");
+}
+
+async function putItem() {
+  let item;
+  try { item = JSON.parse(document.getElementById("putItemJson").value); }
+  catch(e) { setStatus("putStatus", "Invalid JSON", "error"); return; }
+  const res = await api(`/tables/${currentTable}/items`, {
+    method: "PUT",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(item)
+  });
+  const data = await res.json();
+  if (!res.ok) { setStatus("putStatus", data.error, "error"); return; }
+  closePutModal();
+  setStatus("tableStatus", "Item saved", "ok");
+  scanItems();
+}
+
+loadTables();
+</script>
+</body>
+</html>

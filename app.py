@@ -9,6 +9,9 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
 
+from dynamodb.routes import dynamo_bp
+app.register_blueprint(dynamo_bp)
+
 ROOT = "storage"
 os.makedirs(ROOT, exist_ok=True)
 
@@ -220,6 +223,12 @@ def delete_bucket(bucket):
         os.rmdir(path)
         return "", 204
     return "", 404
+
+@app.route("/dynamodb")
+def dynamodb_page():
+    if not session.get("user_email"):
+        return redirect("/signin")
+    return render_template("dynamodb.html")
 
 
 if __name__ == "__main__":
