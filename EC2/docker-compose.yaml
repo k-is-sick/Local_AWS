@@ -1,0 +1,14 @@
+services:
+  miniec2:
+    build: .
+    ports:
+      - "4567:4567"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - localaws
+
+networks:
+  localaws:
+    name: localaws
+    external: true

@@ -1,0 +1,42 @@
+services:
+  miniiam:
+    build: .
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DB_HOST=iamdb
+      - DB_NAME=localawsiam
+      - DB_USER=localawsiam
+      - DB_PASSWORD=localawsiam
+    ports:
+      - "4568:4568"
+    volumes:
+      - "../templates:/app/templates"
+    depends_on:
+      iamdb:
+        condition: service_healthy
+    networks:
+      - localaws
+
+  iamdb:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=localawsiam
+      - POSTGRES_USER=localawsiam
+      - POSTGRES_PASSWORD=localawsiam
+    volumes:
+      - "iamdata:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U localawsiam"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - localaws
+
+volumes:
+  iamdata:
+
+networks:
+  localaws:
+    name: localaws
+    external: true

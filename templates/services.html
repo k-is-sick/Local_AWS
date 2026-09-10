@@ -2,36 +2,173 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Services — LocalAWS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services — LocalAWS Console</title>
 <style>
-  :root { --bg:#0e1117; --panel:#161b22; --border:#2a313c; --text:#d6dde5; --muted:#8b94a3; --accent:#ff9900; }
+  :root {
+    --bg: #0e1117;
+    --panel: #161b22;
+    --panel-hover: #1c2129;
+    --border: #2a313c;
+    --text: #d6dde5;
+    --muted: #8b94a3;
+    --accent: #ff9900;
+  }
   * { box-sizing: border-box; }
-  body { margin:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text); }
-  header { padding:16px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
-  .logo { width:28px; height:28px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:800; color:#161616; font-size:13px; }
-  header h1 { font-size: 15px; margin: 0; }
-  .userinfo { margin-left: auto; display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--muted); }
-  .userinfo button { background: none; border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
-  .userinfo button:hover { border-color: var(--accent); }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--panel);
+  }
+  .logo {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #161616;
+    font-size: 15px;
+    letter-spacing: -0.5px;
+  }
+  header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
+  .userinfo {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .userinfo button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .userinfo button:hover {
+    border-color: var(--accent);
+    color: #fff;
+  }
 
-  main { max-width: 880px; margin: 50px auto; padding: 0 24px; }
-  main h2 { font-size: 20px; margin-bottom: 4px; }
-  main .sub { color: var(--muted); font-size: 13px; margin-bottom: 32px; }
+  main {
+    max-width: 980px;
+    margin: 48px auto;
+    padding: 0 24px;
+  }
+  .page-header {
+    margin-bottom: 28px;
+  }
+  main h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+  }
+  main .sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0;
+  }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+  }
   .card {
-    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
-    padding: 22px; text-decoration: none; color: var(--text);
-    display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
-    transition: border-color 0.15s;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    position: relative;
   }
-  .card:hover { border-color: var(--accent); }
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    background: var(--panel-hover);
+  }
   .icon-box {
-    width: 44px; height: 44px; border-radius: 8px; display:flex; align-items:center; justify-content:center;
-    font-weight: 800; font-size: 14px; color: #161616;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    color: #161616;
+    letter-spacing: -0.3px;
   }
-  .card h3 { margin: 0; font-size: 15px; }
-  .card p { margin: 0; color: var(--muted); font-size: 12px; }
+  .card h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .card .status-pill {
+    margin-top: auto;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .status-live {
+    background: rgba(63, 185, 80, 0.15);
+    color: #3fb950;
+    border: 1px solid rgba(63, 185, 80, 0.3);
+  }
+  .status-preview {
+    background: rgba(139, 148, 163, 0.15);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
 </style>
 </head>
 <body>
@@ -39,33 +176,62 @@
   <div class="logo">L</div>
   <h1>LocalAWS Console</h1>
   <div class="userinfo">
-    <span>{{ email }}</span>
+    <div class="user-badge">
+      <span>●</span>
+      <span>{{ email }}</span>
+    </div>
     <button onclick="logout()">Sign out</button>
   </div>
 </header>
 <main>
-  <h2>Services</h2>
-  <div class="sub">Choose a service to get started</div>
+  <div class="page-header">
+    <h2>Services</h2>
+    <p class="sub">Select a service to manage your local cloud infrastructure</p>
+  </div>
   <div class="grid">
     <a class="card" href="/s3console">
       <div class="icon-box" style="background:#3fb950">S3</div>
-      <h3>S3</h3>
-      <p>Simple storage for buckets and objects</p>
+      <div>
+        <h3>S3</h3>
+        <p>Scalable object storage for buckets and files</p>
+      </div>
+      <span class="status-pill status-live">Live</span>
     </a>
-    <a class="card" href="/coming-soon/ec2">
-      <div class="icon-box" style="background:#ff9900">EC2</div>
-      <h3>EC2</h3>
-      <p>Virtual compute instances</p>
-    </a>
-    <a class="card" href="/coming-soon/lambda">
-      <div class="icon-box" style="background:#e5534b">λ</div>
-      <h3>Lambda</h3>
-      <p>Run code without managing servers</p>
-    </a>
+
     <a class="card" href="/dynamodb">
-      <div class="icon-box" style="background:#4da3ff">DB</div>
-      <h3>DynamoDB</h3>
-      <p>Managed NoSQL database</p>
+      <div class="icon-box" style="background:#4da3ff; color:#fff;">DB</div>
+      <div>
+        <h3>DynamoDB</h3>
+        <p>Fast NoSQL key-value & document table database</p>
+      </div>
+      <span class="status-pill status-live">Live</span>
+    </a>
+
+    <a class="card" href="http://localhost:4567" target="_blank">
+      <div class="icon-box" style="background:#ff9900">EC2</div>
+      <div>
+        <h3>EC2</h3>
+        <p>Virtual compute instances and web terminal (:4567)</p>
+      </div>
+      <span class="status-pill status-live">Live (:4567)</span>
+    </a>
+
+    <a class="card" href="/iamconsole">
+      <div class="icon-box" style="background:#a371f7; color:#fff;">IAM</div>
+      <div>
+        <h3>IAM</h3>
+        <p>Manage users, policies, roles, and access permissions</p>
+      </div>
+      <span class="status-pill status-live">Live</span>
+    </a>
+
+    <a class="card" href="/coming-soon/lambda">
+      <div class="icon-box" style="background:#e5534b; color:#fff;">λ</div>
+      <div>
+        <h3>Lambda</h3>
+        <p>Serverless event-driven compute engine</p>
+      </div>
+      <span class="status-pill status-preview">Coming Soon</span>
     </a>
   </div>
 </main>

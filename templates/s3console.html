@@ -145,8 +145,11 @@
 <header>
   <div class="logo">S3</div>
   <h1>LocalAWS Console — S3</h1>
-  <a href="/services" style="color:var(--muted);text-decoration:none;font-size:13px;margin-left:24px;">← Services</a>
-  <div class="endpoint" id="endpointLabel" style="margin-left:auto;"></div>
+  <a href="/services" style="color:var(--muted);text-decoration:none;font-size:13px;margin-left:16px;">← Services</a>
+  <div class="userinfo" style="margin-left:auto; display:flex; align-items:center; gap:14px; font-size:13px; color:var(--muted);">
+    <div class="user-badge" id="userEmailBadge" style="background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text); font-size:12px;">Loading...</div>
+    <button onclick="logout()">Sign out</button>
+  </div>
 </header>
 
 <main>
@@ -176,7 +179,6 @@
 
 <script>
 const ENDPOINT = "/api/s3";
-document.getElementById("endpointLabel").textContent = "";
 
 let currentBucket = null; // null = bucket list view
 
@@ -416,6 +418,22 @@ async function deleteObject(key) {
   }
 }
 
+async function loadUserInfo() {
+  try {
+    const res = await fetch("/api/me", { credentials: "include" });
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById("userEmailBadge").textContent = data.email || "User";
+    }
+  } catch (err) {}
+}
+
+async function logout() {
+  await fetch("/api/logout", { method: "POST", credentials: "include" });
+  window.location.href = "/";
+}
+
+loadUserInfo();
 renderBreadcrumb();
 renderToolbar();
 loadBuckets();

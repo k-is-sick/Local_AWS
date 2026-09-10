@@ -2,27 +2,118 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>{{ service }} — LocalAWS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ service }} — LocalAWS Console</title>
 <style>
-  :root { --bg:#0e1117; --panel:#161b22; --border:#2a313c; --text:#d6dde5; --muted:#8b94a3; --accent:#ff9900; }
+  :root {
+    --bg: #0e1117;
+    --panel: #161b22;
+    --border: #2a313c;
+    --text: #d6dde5;
+    --muted: #8b94a3;
+    --accent: #ff9900;
+  }
   * { box-sizing: border-box; }
-  body { margin:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text); }
-  header { padding:16px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
-  .logo { width:28px; height:28px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:800; color:#161616; font-size:13px; }
-  header a { color: var(--text); text-decoration: none; font-size: 14px; }
-  main { max-width: 500px; margin: 100px auto; text-align: center; padding: 0 20px; }
-  main h2 { font-size: 24px; margin-bottom: 10px; }
-  main p { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
-  a.btn { text-decoration: none; padding: 10px 20px; border-radius: 6px; font-size: 13px; border: 1px solid var(--border); color: var(--text); }
-  a.btn:hover { border-color: var(--accent); }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--panel);
+  }
+  .logo {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #161616;
+    font-size: 15px;
+  }
+  header a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  main {
+    max-width: 540px;
+    margin: 100px auto;
+    text-align: center;
+    padding: 0 24px;
+  }
+  .preview-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 28px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .service-tag {
+    display: inline-block;
+    background: rgba(255, 153, 0, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(255, 153, 0, 0.3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  main h2 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+  }
+  main p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0 0 28px 0;
+  }
+  .btn-back {
+    display: inline-block;
+    text-decoration: none;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    color: var(--text);
+    background: var(--bg);
+    transition: all 0.15s;
+  }
+  .btn-back:hover {
+    border-color: var(--accent);
+    color: #fff;
+  }
 </style>
 </head>
 <body>
-<header><div class="logo">L</div><a href="/services">LocalAWS</a></header>
+<header>
+  <div class="logo">L</div>
+  <a href="/services">LocalAWS Console</a>
+</header>
 <main>
-  <h2>{{ service }} — Coming Soon</h2>
-  <p>This service hasn't been built yet. Only S3 is currently implemented in this LocalAWS instance.</p>
-  <a class="btn" href="/services">← Back to Services</a>
+  <div class="preview-box">
+    <div class="service-tag">{{ service }} Service</div>
+    <h2>Coming Soon</h2>
+    <p>The <strong>{{ service }}</strong> module is currently in development. In this LocalAWS environment, <strong>S3</strong> and <strong>DynamoDB</strong> are fully operational.</p>
+    <a class="btn-back" href="/services">← Back to Services</a>
+  </div>
 </main>
 </body>
 </html>

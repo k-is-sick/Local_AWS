@@ -1,18 +1,15 @@
 from flask import Flask, request, send_file, session, redirect, render_template, jsonify
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
-from functools import wraps
 import os
 import time
 import psycopg2
 import requests
+from functools import wraps
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
-app.secret_key = os.environ.get("SECRET_KEY", "localaws-dev-secret")
-
-from dynamodb import dynamo_bp
-app.register_blueprint(dynamo_bp)
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
 
 ROOT = "storage"
 os.makedirs(ROOT, exist_ok=True)
@@ -22,31 +19,7 @@ DB_NAME = os.environ.get("DB_NAME", "localaws")
 DB_USER = os.environ.get("DB_USER", "localaws")
 DB_PASSWORD = os.environ.get("DB_PASSWORD", "localaws")
 
-
-def get_iam_url():
-    # Supports Docker container network and host-level execution
-    return os.environ.get("IAM_URL", "http://miniiam:4568")
-
-
-def call_iam_authorize(access_key_id, secret_key, action, resource):
-    urls = [get_iam_url(), "http://localhost:4568", "http://127.0.0.1:4568"]
-    for url in urls:
-        try:
-            resp = requests.post(
-                f"{url}/api/iam/authorize",
-                json={
-                    "access_key_id": access_key_id,
-                    "secret_key": secret_key,
-                    "action": action,
-                    "resource": resource,
-                },
-                timeout=3,
-            )
-            return resp.json()
-        except requests.RequestException:
-            continue
-    return None
-
+IAM_URL = "http://miniiam:4568"
 
 def require_permission(action, resource_fn):
     def decorator(f):
@@ -56,8 +29,13 @@ def require_permission(action, resource_fn):
             secret = request.headers.get("X-Secret-Key")
             if akid and secret:
                 resource = resource_fn(request)
-                data = call_iam_authorize(akid, secret, action, resource)
-                if data is None:
+                try:
+                    resp = requests.post(f"{IAM_URL}/api/iam/authorize", json={
+                        "access_key_id": akid, "secret_key": secret,
+                        "action": action, "resource": resource,
+                    }, timeout=3)
+                    data = resp.json()
+                except requests.RequestException:
                     return jsonify({"error": "IAM service unreachable"}), 503
                 if not data.get("allowed"):
                     return jsonify({"error": "access denied"}), 403
@@ -128,46 +106,6 @@ def s3_console_page():
     if not session.get("user_email"):
         return redirect("/signin")
     return render_template("s3console.html")
-
-
-@app.route("/dynamodb")
-def dynamodb_page():
-    if not session.get("user_email"):
-        return redirect("/signin")
-    return render_template("dynamodb.html")
-
-
-@app.route("/iamconsole")
-def iam_console_page():
-    if not session.get("user_email"):
-        return redirect("/signin")
-    return render_template("iamconsole.html")
-
-
-@app.route("/api/iam/<path:subpath>", methods=["GET", "POST", "PUT", "DELETE"])
-def proxy_iam(subpath):
-    urls = [get_iam_url(), "http://localhost:4568", "http://127.0.0.1:4568"]
-    last_err = None
-    for url in urls:
-        try:
-            target_url = f"{url}/api/iam/{subpath}"
-            resp = requests.request(
-                method=request.method,
-                url=target_url,
-                headers={k: v for k, v in request.headers if k.lower() != 'host'},
-                data=request.get_data(),
-                cookies=request.cookies,
-                allow_redirects=False,
-                timeout=5
-            )
-            excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-            headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower() not in excluded_headers]
-            return (resp.content, resp.status_code, headers)
-        except requests.RequestException as e:
-            last_err = e
-            continue
-            
-    return jsonify({"error": "IAM service is currently offline. Start it via: cd IAM; docker-compose up -d --build"}), 503
 
 
 @app.route("/coming-soon/<service>")
@@ -241,7 +179,7 @@ def api_me():
     return jsonify({"email": None}), 401
 
 
-# ---------- S3 API (with IAM Policy and Session checks) ----------
+# ---------- S3 API (IAM-protected, session fallback) ----------
 
 @app.route("/favicon.ico")
 def favicon():
@@ -256,7 +194,7 @@ def create_bucket(bucket):
 
 
 @app.route("/api/s3", methods=["GET"])
-@require_permission("s3:ListAllMyBuckets", lambda r: "arn:localaws:s3:::*")
+@require_permission("s3:ListBuckets", lambda r: "arn:localaws:s3:::*")
 def list_buckets():
     return {"buckets": os.listdir(ROOT)}
 
@@ -271,7 +209,7 @@ def upload(bucket, key):
 
 
 @app.route("/api/s3/<bucket>", methods=["GET"])
-@require_permission("s3:ListBucket", lambda r: f"arn:localaws:s3:::{r.view_args['bucket']}")
+@require_permission("s3:ListObjects", lambda r: f"arn:localaws:s3:::{r.view_args['bucket']}")
 def list_objects(bucket):
     return {"objects": os.listdir(f"{ROOT}/{bucket}")}
 

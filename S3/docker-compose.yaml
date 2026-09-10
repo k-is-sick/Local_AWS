@@ -1,5 +1,5 @@
 services:
-  localaws:
+  minis3:
     build: .
     environment:
       - PYTHONUNBUFFERED=1
@@ -12,8 +12,7 @@ services:
       - "4566:4566"
     volumes:
       - "./storage:/app/storage"
-      - "./dynamodb_data:/app/dynamodb_data"
-      - "./templates:/app/templates"
+      - "../templates:/app/templates"
     depends_on:
       db:
         condition: service_healthy

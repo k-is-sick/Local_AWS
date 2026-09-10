@@ -2,101 +2,422 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DynamoDB — LocalAWS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LocalAWS Console — DynamoDB</title>
 <style>
   :root {
-    --bg:#0e1117; --panel:#161b22; --border:#2a313c;
-    --text:#d6dde5; --muted:#8b94a3; --accent:#4da3ff;
-    --danger:#e5534b; --ok:#3fb950;
+    --bg: #0e1117;
+    --panel: #161b22;
+    --panel-hover: #1f242c;
+    --border: #2a313c;
+    --text: #d6dde5;
+    --muted: #8b94a3;
+    --accent: #4da3ff;
+    --accent-orange: #ff9900;
+    --danger: #e5534b;
+    --ok: #3fb950;
   }
   * { box-sizing: border-box; }
-  body { margin:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text); }
-  header { padding:16px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
-  .logo { width:28px; height:28px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:11px; }
-  header h1 { font-size:15px; margin:0; }
-  header a { color:var(--muted); text-decoration:none; font-size:13px; margin-left:20px; }
-  main { max-width:1000px; margin:30px auto; padding:0 24px; display:grid; grid-template-columns:260px 1fr; gap:20px; }
-  .panel { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:16px; }
-  .panel h2 { font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 12px; }
-  input,textarea { width:100%; padding:8px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:13px; margin-bottom:8px; }
-  textarea { height:80px; resize:vertical; font-family:monospace; }
-  button { padding:8px 14px; border-radius:6px; border:1px solid var(--border); color:var(--text); background:var(--panel); font-size:13px; cursor:pointer; width:100%; margin-bottom:6px; }
-  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
-  button.danger { color:var(--danger); }
-  button.danger:hover { border-color:var(--danger); }
-  button:hover { border-color:var(--accent); }
-  .table-list { margin-top:8px; }
-  .table-item { padding:8px 10px; border-radius:6px; cursor:pointer; font-size:13px; display:flex; justify-content:space-between; align-items:center; }
-  .table-item:hover,.table-item.active { background:var(--border); }
-  .table-item .del { color:var(--danger); font-size:11px; cursor:pointer; opacity:0; }
-  .table-item:hover .del { opacity:1; }
-  .right-panel h2 { font-size:15px; margin:0 0 4px; }
-  .right-panel .meta { color:var(--muted); font-size:12px; margin-bottom:16px; }
-  .toolbar { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
-  .toolbar input { margin:0; width:auto; flex:1; }
-  .toolbar button { width:auto; margin:0; }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); padding:8px 10px; border-bottom:1px solid var(--border); }
-  td { padding:9px 10px; border-bottom:1px solid var(--border); }
-  tr:hover td { background:var(--panel); }
-  .empty { color:var(--muted); text-align:center; padding:32px; font-size:13px; }
-  .status { font-size:12px; min-height:16px; margin-top:10px; }
-  .status.ok { color:var(--ok); }
-  .status.error { color:var(--danger); }
-  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); align-items:center; justify-content:center; z-index:50; }
-  .modal-overlay.open { display:flex; }
-  .modal { background:var(--panel); border:1px solid var(--border); border-radius:8px; width:480px; max-width:90vw; padding:24px; }
-  .modal h3 { margin:0 0 14px; font-size:15px; }
-  .modal-footer { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
-  .modal-footer button { width:auto; margin:0; }
-  label { font-size:12px; color:var(--muted); display:block; margin-bottom:4px; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--panel);
+  }
+  .logo {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #fff;
+    font-size: 13px;
+    letter-spacing: -0.5px;
+  }
+  header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
+  .nav-back {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    margin-left: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .nav-back:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .userinfo {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .user-badge {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 12px;
+  }
+  .userinfo button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .userinfo button:hover {
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 28px auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .panel h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  label {
+    font-size: 12px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  input, textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    margin-bottom: 12px;
+    transition: border-color 0.15s;
+  }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  textarea {
+    height: 110px;
+    resize: vertical;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.4;
+  }
+  button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    background: var(--panel);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+  button.primary:hover { opacity: 0.92; }
+  button.danger { color: var(--danger); }
+  button.danger:hover { border-color: var(--danger); background: rgba(229, 83, 75, 0.1); }
+  .btn-full { width: 100%; }
+
+  .table-list {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .table-item {
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .table-item:hover {
+    background: var(--panel-hover);
+    border-color: var(--border);
+  }
+  .table-item.active {
+    background: rgba(77, 163, 255, 0.12);
+    border-color: rgba(77, 163, 255, 0.4);
+    color: #fff;
+    font-weight: 600;
+  }
+  .table-item .del {
+    color: var(--danger);
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .table-item:hover .del { opacity: 1; }
+  .table-item .del:hover { background: rgba(229, 83, 75, 0.15); }
+
+  .right-panel .table-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .right-panel h2.table-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: var(--text);
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .meta-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    font-size: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: var(--muted);
+  }
+  .chip strong { color: var(--text); }
+
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .toolbar input {
+    margin: 0;
+    width: auto;
+    flex: 1;
+    min-width: 180px;
+  }
+  .toolbar button { margin: 0; }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+    padding: 10px 12px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--panel-hover); }
+
+  .empty {
+    color: var(--muted);
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 13px;
+  }
+  .status {
+    font-size: 12px;
+    min-height: 18px;
+    margin-top: 10px;
+  }
+  .status.ok { color: var(--ok); }
+  .status.error { color: var(--danger); }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.65);
+    backdrop-filter: blur(2px);
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 520px;
+    max-width: 90vw;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .modal h3 {
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+  .json-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: -8px;
+    margin-bottom: 10px;
+  }
 </style>
 </head>
 <body>
 <header>
   <div class="logo">DB</div>
-  <h1>LocalAWS — DynamoDB</h1>
-  <a href="/services">← Services</a>
+  <h1>LocalAWS Console — DynamoDB</h1>
+  <a class="nav-back" href="/services">← Services</a>
+  <div class="userinfo">
+    <div class="user-badge" id="userEmailBadge">Loading...</div>
+    <button onclick="logout()">Sign out</button>
+  </div>
 </header>
 
 <main>
-  <!-- LEFT: table list + create -->
+  <!-- LEFT: Table List & Table Creator -->
   <div>
-    <div class="panel" style="margin-bottom:16px;">
+    <div class="panel" style="margin-bottom: 20px;">
       <h2>Create Table</h2>
-      <label>Table name</label>
+      <label>Table Name</label>
       <input type="text" id="newTableName" placeholder="e.g. users">
-      <label>Partition key</label>
+      
+      <label>Partition Key (PK)</label>
       <input type="text" id="newPK" placeholder="e.g. user_id">
-      <label>Sort key (optional)</label>
+      
+      <label>Sort Key (SK, optional)</label>
       <input type="text" id="newSK" placeholder="e.g. created_at">
-      <button class="primary" onclick="createTable()">Create table</button>
+      
+      <button class="primary btn-full" onclick="createTable()">Create Table</button>
       <div class="status" id="createStatus"></div>
     </div>
+
     <div class="panel">
-      <h2>Tables</h2>
+      <h2>
+        <span>Tables</span>
+        <span id="tableCountBadge" style="font-size: 11px; color: var(--muted);"></span>
+      </h2>
       <div class="table-list" id="tableList">
-        <div class="empty">No tables yet</div>
+        <div class="empty">Loading tables...</div>
       </div>
     </div>
   </div>
 
-  <!-- RIGHT: table view -->
+  <!-- RIGHT: Selected Table Viewer -->
   <div class="panel right-panel" id="rightPanel" style="display:none;">
-    <h2 id="tableTitle"></h2>
-    <div class="meta" id="tableMeta"></div>
-    <div class="toolbar">
-      <button class="primary" onclick="openPutModal()">+ Put item</button>
-      <input type="text" id="getKeyInput" placeholder="Partition key value to get">
-      <button onclick="getItem()">Get item</button>
-      <button onclick="scanItems()">Scan all</button>
+    <div class="table-header">
+      <div>
+        <h2 class="table-title" id="tableTitle"></h2>
+        <div class="meta-chips" id="tableMetaChips"></div>
+      </div>
+      <button class="danger" onclick="deleteCurrentTable()">Delete Table</button>
     </div>
-    <table>
-      <thead><tr id="itemsHead"></tr></thead>
-      <tbody id="itemsBody"></tbody>
-    </table>
-    <div class="empty" id="itemsEmpty" style="display:none;"></div>
+
+    <div class="toolbar">
+      <button class="primary" onclick="openPutModal()">+ Put Item</button>
+      <input type="text" id="getKeyInput" placeholder="Enter partition key value...">
+      <button onclick="getItem()">Get Item</button>
+      <button onclick="scanItems()">Scan All</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr id="itemsHead"></tr></thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+      <div class="empty" id="itemsEmpty" style="display:none;"></div>
+    </div>
+
     <div class="status" id="tableStatus"></div>
+  </div>
+
+  <div class="panel right-panel" id="noTableSelectedPanel">
+    <div class="empty" style="padding: 80px 20px;">
+      <div style="font-size: 28px; margin-bottom: 12px; color: var(--accent);">▤</div>
+      <h3 style="margin: 0 0 6px; font-size: 16px; color: var(--text);">No Table Selected</h3>
+      <p style="margin: 0; color: var(--muted);">Select a table from the left or create a new one to view and manage its items.</p>
+    </div>
   </div>
 </main>
 
@@ -104,12 +425,13 @@
 <div class="modal-overlay" id="putModal">
   <div class="modal">
     <h3>Put Item</h3>
-    <label>JSON item</label>
-    <textarea id="putItemJson" placeholder='{"user_id":"1","name":"Yash"}'></textarea>
+    <label>JSON Item Document</label>
+    <textarea id="putItemJson" placeholder='{"user_id": "1", "name": "Alice"}'></textarea>
+    <div class="json-hint">Ensure the JSON document contains the table's partition key and optional sort key.</div>
     <div class="status" id="putStatus"></div>
     <div class="modal-footer">
       <button onclick="closePutModal()">Cancel</button>
-      <button class="primary" onclick="putItem()">Save item</button>
+      <button class="primary" onclick="putItem()">Save Item</button>
     </div>
   </div>
 </div>
@@ -126,121 +448,237 @@ async function api(path, options={}) {
 
 function setStatus(id, msg, type) {
   const el = document.getElementById(id);
-  el.textContent = msg;
+  if (!el) return;
+  el.textContent = msg || "";
   el.className = "status" + (type ? " " + type : "");
 }
 
+async function loadUserInfo() {
+  try {
+    const res = await fetch("/api/me", { credentials: "include" });
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById("userEmailBadge").textContent = data.email || "User";
+    }
+  } catch (err) {}
+}
+
+async function logout() {
+  await fetch("/api/logout", { method: "POST", credentials: "include" });
+  window.location.href = "/";
+}
+
 async function loadTables() {
-  const res = await api("/tables");
-  const data = await res.json();
-  const el = document.getElementById("tableList");
-  if (!data.tables || data.tables.length === 0) {
-    el.innerHTML = `<div class="empty">No tables yet</div>`;
-    return;
+  try {
+    const res = await api("/tables");
+    if (!res.ok) {
+      if (res.status === 401) window.location.href = "/signin";
+      return;
+    }
+    const data = await res.json();
+    const el = document.getElementById("tableList");
+    const countBadge = document.getElementById("tableCountBadge");
+    const tables = data.tables || [];
+    countBadge.textContent = `${tables.length} total`;
+
+    if (tables.length === 0) {
+      el.innerHTML = `<div class="empty">No tables yet</div>`;
+      return;
+    }
+
+    el.innerHTML = tables.map(t => `
+      <div class="table-item ${t === currentTable ? 'active' : ''}" onclick="openTable('${t}')">
+        <span>▤ ${t}</span>
+        <span class="del" onclick="event.stopPropagation(); deleteTableByName('${t}')" title="Delete table">✕</span>
+      </div>`).join("");
+  } catch (err) {
+    setStatus("createStatus", "Failed to connect to DynamoDB API", "error");
   }
-  el.innerHTML = data.tables.map(t => `
-    <div class="table-item ${t === currentTable ? 'active' : ''}" onclick="openTable('${t}')">
-      <span>▤ ${t}</span>
-      <span class="del" onclick="event.stopPropagation(); deleteTable('${t}')">✕ Delete</span>
-    </div>`).join("");
 }
 
 async function createTable() {
   const name = document.getElementById("newTableName").value.trim();
   const pk = document.getElementById("newPK").value.trim();
   const sk = document.getElementById("newSK").value.trim();
-  if (!name || !pk) { setStatus("createStatus", "Table name and partition key required", "error"); return; }
-  const res = await api("/tables", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({table_name: name, partition_key: pk, sort_key: sk || null})
-  });
-  const data = await res.json();
-  if (!res.ok) { setStatus("createStatus", data.error, "error"); return; }
-  setStatus("createStatus", "Table created: " + name, "ok");
-  document.getElementById("newTableName").value = "";
-  document.getElementById("newPK").value = "";
-  document.getElementById("newSK").value = "";
-  loadTables();
-  openTable(name);
+  
+  if (!name || !pk) {
+    setStatus("createStatus", "Table name and partition key are required", "error");
+    return;
+  }
+  
+  try {
+    const res = await api("/tables", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ table_name: name, partition_key: pk, sort_key: sk || null })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setStatus("createStatus", data.error || "Failed to create table", "error");
+      return;
+    }
+    setStatus("createStatus", "Table created: " + name, "ok");
+    document.getElementById("newTableName").value = "";
+    document.getElementById("newPK").value = "";
+    document.getElementById("newSK").value = "";
+    await loadTables();
+    openTable(name);
+  } catch (err) {
+    setStatus("createStatus", "Could not create table: " + err.message, "error");
+  }
 }
 
-async function deleteTable(name) {
-  if (!confirm(`Delete table "${name}"? All items will be lost.`)) return;
-  await api(`/tables/${name}`, {method: "DELETE"});
-  if (currentTable === name) {
-    currentTable = null;
-    document.getElementById("rightPanel").style.display = "none";
+async function deleteTableByName(name) {
+  if (!confirm(`Delete table "${name}"? All contained items will be permanently removed.`)) return;
+  try {
+    const res = await api(`/tables/${encodeURIComponent(name)}`, { method: "DELETE" });
+    if (res.ok || res.status === 204) {
+      if (currentTable === name) {
+        currentTable = null;
+        document.getElementById("rightPanel").style.display = "none";
+        document.getElementById("noTableSelectedPanel").style.display = "block";
+      }
+      loadTables();
+    }
+  } catch (err) {
+    alert("Failed to delete table: " + err.message);
   }
-  loadTables();
+}
+
+function deleteCurrentTable() {
+  if (currentTable) deleteTableByName(currentTable);
 }
 
 async function openTable(name) {
   currentTable = name;
-  const res = await api(`/tables/${name}`);
-  const data = await res.json();
-  currentMeta = data.meta;
-  document.getElementById("rightPanel").style.display = "block";
-  document.getElementById("tableTitle").textContent = name;
-  const sk = data.meta.sort_key ? ` + ${data.meta.sort_key} (sort)` : "";
-  document.getElementById("tableMeta").textContent =
-    `Partition key: ${data.meta.partition_key}${sk} · ${data.count} item(s)`;
-  loadTables();
-  scanItems();
+  try {
+    const res = await api(`/tables/${encodeURIComponent(name)}`);
+    if (!res.ok) {
+      alert("Could not load table metadata");
+      return;
+    }
+    const data = await res.json();
+    currentMeta = data.meta;
+
+    document.getElementById("noTableSelectedPanel").style.display = "none";
+    document.getElementById("rightPanel").style.display = "block";
+    document.getElementById("tableTitle").textContent = name;
+
+    const chipsEl = document.getElementById("tableMetaChips");
+    let chipsHtml = `<div class="chip">PK: <strong>${data.meta.partition_key}</strong></div>`;
+    if (data.meta.sort_key) {
+      chipsHtml += `<div class="chip">SK: <strong>${data.meta.sort_key}</strong></div>`;
+    }
+    chipsHtml += `<div class="chip">Items: <strong id="tableItemCount">${data.count}</strong></div>`;
+    chipsEl.innerHTML = chipsHtml;
+
+    loadTables();
+    scanItems();
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 async function scanItems() {
-  const res = await api(`/tables/${currentTable}/scan`);
-  const data = await res.json();
-  renderItems(data.items);
-  setStatus("tableStatus", `${data.count} item(s) found`, "");
+  if (!currentTable) return;
+  setStatus("tableStatus", "Scanning table...", "");
+  try {
+    const res = await api(`/tables/${encodeURIComponent(currentTable)}/scan`);
+    const data = await res.json();
+    if (!res.ok) {
+      setStatus("tableStatus", data.error || "Scan failed", "error");
+      return;
+    }
+    renderItems(data.items);
+    const countEl = document.getElementById("tableItemCount");
+    if (countEl) countEl.textContent = data.count;
+    setStatus("tableStatus", `${data.count} item(s) scanned`, "ok");
+  } catch (err) {
+    setStatus("tableStatus", "Scan failed: " + err.message, "error");
+  }
 }
 
 async function getItem() {
   const key = document.getElementById("getKeyInput").value.trim();
-  if (!key) { scanItems(); return; }
-  const res = await api(`/tables/${currentTable}/items/${encodeURIComponent(key)}`);
-  const data = await res.json();
-  if (!res.ok) { setStatus("tableStatus", data.error, "error"); renderItems([]); return; }
-  renderItems([data.item]);
-  setStatus("tableStatus", "Item found", "ok");
+  if (!key) {
+    scanItems();
+    return;
+  }
+  setStatus("tableStatus", "Fetching item...", "");
+  try {
+    const res = await api(`/tables/${encodeURIComponent(currentTable)}/items/${encodeURIComponent(key)}`);
+    const data = await res.json();
+    if (!res.ok) {
+      setStatus("tableStatus", data.error || "Item not found", "error");
+      renderItems([]);
+      return;
+    }
+    renderItems([data.item]);
+    setStatus("tableStatus", "Item found", "ok");
+  } catch (err) {
+    setStatus("tableStatus", "Error: " + err.message, "error");
+  }
 }
 
 function renderItems(items) {
   const head = document.getElementById("itemsHead");
   const body = document.getElementById("itemsBody");
   const empty = document.getElementById("itemsEmpty");
+
   if (!items || items.length === 0) {
     head.innerHTML = "";
     body.innerHTML = "";
     empty.style.display = "block";
-    empty.textContent = "No items found.";
+    empty.textContent = "No items in this table matching query.";
     return;
   }
+
   empty.style.display = "none";
   const cols = [...new Set(items.flatMap(i => Object.keys(i)))];
-  head.innerHTML = cols.map(c => `<th>${c}</th>`).join("") + `<th></th>`;
+  head.innerHTML = cols.map(c => `<th>${c}</th>`).join("") + `<th style="text-align:right;">Actions</th>`;
+
   body.innerHTML = items.map(item => {
     const pk = currentMeta.partition_key;
     const sk = currentMeta.sort_key;
-    const key = sk ? `${item[pk]}#${item[sk] || ""}` : item[pk];
-    const cells = cols.map(c => `<td>${item[c] ?? ""}</td>`).join("");
-    return `<tr>${cells}<td><button class="danger" style="width:auto;padding:4px 8px;font-size:11px;" onclick="deleteItem('${key}')">Delete</button></td></tr>`;
+    const key = sk ? `${item[pk]}#${item[sk] ?? ""}` : item[pk];
+    const cells = cols.map(c => {
+      const val = item[c];
+      const displayVal = typeof val === "object" ? JSON.stringify(val) : (val ?? "");
+      return `<td title="${String(displayVal).replace(/"/g, '&quot;')}">${displayVal}</td>`;
+    }).join("");
+
+    return `<tr>
+      ${cells}
+      <td style="text-align:right;">
+        <button class="danger" style="padding: 4px 10px; font-size: 12px;" onclick="deleteItem('${encodeURIComponent(key)}')">Delete</button>
+      </td>
+    </tr>`;
   }).join("");
 }
 
-async function deleteItem(key) {
-  if (!confirm(`Delete item "${key}"?`)) return;
-  await api(`/tables/${currentTable}/items/${encodeURIComponent(key)}`, {method: "DELETE"});
-  setStatus("tableStatus", "Item deleted", "ok");
-  scanItems();
+async function deleteItem(encodedKey) {
+  const key = decodeURIComponent(encodedKey);
+  if (!confirm(`Delete item with key "${key}"?`)) return;
+  try {
+    const res = await api(`/tables/${encodeURIComponent(currentTable)}/items/${encodedKey}`, { method: "DELETE" });
+    if (res.ok || res.status === 204) {
+      setStatus("tableStatus", "Item deleted", "ok");
+      scanItems();
+    } else {
+      const data = await res.json();
+      setStatus("tableStatus", data.error || "Delete failed", "error");
+    }
+  } catch (err) {
+    setStatus("tableStatus", "Delete failed: " + err.message, "error");
+  }
 }
 
 function openPutModal() {
   if (!currentMeta) return;
-  const example = {[currentMeta.partition_key]: "value"};
+  const example = { [currentMeta.partition_key]: "value" };
   if (currentMeta.sort_key) example[currentMeta.sort_key] = "value";
   document.getElementById("putItemJson").value = JSON.stringify(example, null, 2);
+  document.getElementById("putStatus").textContent = "";
   document.getElementById("putModal").classList.add("open");
 }
 
@@ -251,20 +689,33 @@ function closePutModal() {
 
 async function putItem() {
   let item;
-  try { item = JSON.parse(document.getElementById("putItemJson").value); }
-  catch(e) { setStatus("putStatus", "Invalid JSON", "error"); return; }
-  const res = await api(`/tables/${currentTable}/items`, {
-    method: "PUT",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(item)
-  });
-  const data = await res.json();
-  if (!res.ok) { setStatus("putStatus", data.error, "error"); return; }
-  closePutModal();
-  setStatus("tableStatus", "Item saved", "ok");
-  scanItems();
+  try {
+    item = JSON.parse(document.getElementById("putItemJson").value);
+  } catch (e) {
+    setStatus("putStatus", "Invalid JSON format: " + e.message, "error");
+    return;
+  }
+
+  try {
+    const res = await api(`/tables/${encodeURIComponent(currentTable)}/items`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(item)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setStatus("putStatus", data.error || "Could not save item", "error");
+      return;
+    }
+    closePutModal();
+    setStatus("tableStatus", "Item saved successfully", "ok");
+    scanItems();
+  } catch (err) {
+    setStatus("putStatus", "Error: " + err.message, "error");
+  }
 }
 
+loadUserInfo();
 loadTables();
 </script>
 </body>

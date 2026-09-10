@@ -1,7 +1,9 @@
 FROM python:3.11-slim
 WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py .
 COPY templates/ templates/
-RUN pip install flask flask-cors psycopg2-binary
+COPY dynamodb/ dynamodb/
 EXPOSE 4566
 CMD ["python", "app.py"]
