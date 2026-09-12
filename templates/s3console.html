@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LocalAWS — S3 Console</title>
+<style>
+  :root {
+    --bg: #0e1117;
+    --panel: #161b22;
+    --border: #2a313c;
+    --text: #d6dde5;
+    --muted: #8b94a3;
+    --accent: #4da3ff;
+    --danger: #e5534b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  header .logo {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #0e1117; font-size: 14px;
+  }
+  header h1 { font-size: 16px; font-weight: 600; margin: 0; }
+  header .endpoint { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+  main { padding: 24px; max-width: 960px; margin: 0 auto; }
+
+  .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .breadcrumb span.current { color: var(--text); }
+  .breadcrumb a { color: var(--accent); cursor: pointer; text-decoration: none; }
+
+  .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  button {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #0e1117; font-weight: 600; }
+  button.danger { color: var(--danger); }
+  button.danger:hover { border-color: var(--danger); }
+  input[type=text] {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  tr.row:hover { background: var(--panel); }
+  tr.row { cursor: pointer; }
+  .name-cell { display: flex; align-items: center; gap: 8px; }
+  .icon { color: var(--accent); font-size: 14px; }
+  .actions-cell { text-align: right; white-space: nowrap; }
+  .actions-cell button { padding: 5px 10px; font-size: 12px; margin-left: 4px; }
+
+  .empty { color: var(--muted); padding: 40px; text-align: center; font-size: 13px; }
+  .status { font-size: 12px; color: var(--muted); margin-top: 12px; min-height: 16px; }
+  .status.error { color: var(--danger); }
+  .status.ok { color: #3fb950; }
+
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    align-items: center; justify-content: center;
+    z-index: 50;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 640px;
+    max-width: 90vw;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-header h2 { font-size: 14px; margin: 0; word-break: break-all; }
+  .modal-header button { padding: 4px 9px; }
+  .modal-body {
+    padding: 16px;
+    overflow: auto;
+    font-size: 13px;
+  }
+  .modal-body img { max-width: 100%; border-radius: 4px; display: block; }
+  .modal-body pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+    color: var(--text);
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 12.5px;
+  }
+  .meta-row { display: flex; gap: 16px; margin-bottom: 12px; color: var(--muted); font-size: 12px; }
+  .modal-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">S3</div>
+  <h1>LocalAWS Console — S3</h1>
+  <a href="/services" style="color:var(--muted);text-decoration:none;font-size:13px;margin-left:16px;">← Services</a>
+  <div class="userinfo" style="margin-left:auto; display:flex; align-items:center; gap:14px; font-size:13px; color:var(--muted);">
+    <div class="user-badge" id="userEmailBadge" style="background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text); font-size:12px;">Loading...</div>
+    <button onclick="logout()">Sign out</button>
+  </div>
+</header>
+
+<main>
+  <div class="breadcrumb" id="breadcrumb"></div>
+  <div class="toolbar" id="toolbar"></div>
+  <table>
+    <thead><tr id="tableHead"></tr></thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <div id="emptyState" class="empty" style="display:none;"></div>
+  <div class="status" id="status"></div>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle"></h2>
+      <button onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody">Loading...</div>
+    <div class="modal-footer">
+      <button id="modalDownloadBtn">Download</button>
+      <button onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ENDPOINT = "/api/s3";
+
+let currentBucket = null; // null = bucket list view
+
+function setStatus(msg, type) {
+  const el = document.getElementById("status");
+  el.textContent = msg || "";
+  el.className = "status" + (type ? " " + type : "");
+}
+
+async function api(path, options) {
+  options = options || {};
+  options.credentials = "include";
+  const res = await fetch(ENDPOINT + path, options);
+  if (!res.ok && res.status !== 204) throw new Error(res.status + " " + res.statusText);
+  return res;
+}
+
+function renderBreadcrumb() {
+  const el = document.getElementById("breadcrumb");
+  if (currentBucket === null) {
+    el.innerHTML = `<span class="current">Buckets</span>`;
+  } else {
+    el.innerHTML = `<a onclick="goToBuckets()">Buckets</a> / <span class="current">${currentBucket}</span>`;
+  }
+}
+
+function renderToolbar() {
+  const el = document.getElementById("toolbar");
+  if (currentBucket === null) {
+    el.innerHTML = `
+      <input type="text" id="newBucketName" placeholder="bucket-name">
+      <button class="primary" onclick="createBucket()">Create bucket</button>
+      <button onclick="loadBuckets()">Refresh</button>
+    `;
+  } else {
+    el.innerHTML = `
+      <input type="file" id="fileInput" style="display:none" onchange="uploadFile()">
+      <button class="primary" onclick="document.getElementById('fileInput').click()">Upload file</button>
+      <button onclick="loadObjects()">Refresh</button>
+      <button class="danger" onclick="deleteBucket()">Delete bucket</button>
+    `;
+  }
+}
+
+function goToBuckets() {
+  currentBucket = null;
+  setStatus("");
+  renderBreadcrumb();
+  renderToolbar();
+  loadBuckets();
+}
+
+async function loadBuckets() {
+  document.getElementById("tableHead").innerHTML =
+    `<th>Bucket name</th><th class="actions-cell">Actions</th>`;
+  try {
+    const res = await api("");
+    const data = await res.json();
+    const body = document.getElementById("tableBody");
+    const empty = document.getElementById("emptyState");
+    body.innerHTML = "";
+    if (!data.buckets || data.buckets.length === 0) {
+      empty.style.display = "block";
+      empty.textContent = "No buckets yet. Create one above.";
+      return;
+    }
+    empty.style.display = "none";
+    data.buckets.forEach(b => {
+      const tr = document.createElement("tr");
+      tr.className = "row";
+      tr.innerHTML = `
+        <td onclick="openBucket('${b}')"><div class="name-cell"><span class="icon">▤</span>${b}</div></td>
+        <td class="actions-cell">
+          <button onclick="event.stopPropagation(); deleteBucketByName('${b}')" class="danger">Delete</button>
+        </td>`;
+      body.appendChild(tr);
+    });
+  } catch (e) {
+    setStatus("Failed to load buckets — is the server running on " + ENDPOINT + "?", "error");
+  }
+}
+
+function openBucket(name) {
+  currentBucket = name;
+  setStatus("");
+  renderBreadcrumb();
+  renderToolbar();
+  loadObjects();
+}
+
+async function createBucket() {
+  const input = document.getElementById("newBucketName");
+  const name = input.value.trim();
+  if (!name) { setStatus("Enter a bucket name first", "error"); return; }
+  try {
+    await api("/" + encodeURIComponent(name), { method: "PUT" });
+    input.value = "";
+    setStatus("Bucket created: " + name, "ok");
+    loadBuckets();
+  } catch (e) {
+    setStatus("Could not create bucket: " + e.message, "error");
+  }
+}
+
+async function deleteBucketByName(name) {
+  if (!confirm(`Delete bucket "${name}"? It must be empty.`)) return;
+  try {
+    await api("/" + encodeURIComponent(name), { method: "DELETE" });
+    setStatus("Bucket deleted: " + name, "ok");
+    loadBuckets();
+  } catch (e) {
+    setStatus("Could not delete bucket (must be empty): " + e.message, "error");
+  }
+}
+
+function deleteBucket() {
+  deleteBucketByName(currentBucket).then(() => {
+    if (document.getElementById("status").className.includes("ok")) goToBuckets();
+  });
+}
+
+async function loadObjects() {
+  document.getElementById("tableHead").innerHTML =
+    `<th>Object key</th><th class="actions-cell">Actions</th>`;
+  try {
+    const res = await api("/" + encodeURIComponent(currentBucket));
+    const data = await res.json();
+    const body = document.getElementById("tableBody");
+    const empty = document.getElementById("emptyState");
+    body.innerHTML = "";
+    if (!data.objects || data.objects.length === 0) {
+      empty.style.display = "block";
+      empty.textContent = "This bucket is empty. Upload a file above.";
+      return;
+    }
+    empty.style.display = "none";
+    data.objects.forEach(key => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><div class="name-cell" ondblclick="inspectObject('${key}')" title="Double-click to inspect"><span class="icon">⬚</span>${key}</div></td>
+        <td class="actions-cell">
+          <button onclick="downloadFile('${key}')">Download</button>
+          <button class="danger" onclick="deleteObject('${key}')">Delete</button>
+        </td>`;
+      body.appendChild(tr);
+    });
+  } catch (e) {
+    setStatus("Failed to load objects: " + e.message, "error");
+  }
+}
+
+async function uploadFile() {
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
+  if (!file) return;
+  setStatus("Uploading " + file.name + "...");
+  try {
+    const buf = await file.arrayBuffer();
+    await api("/" + encodeURIComponent(currentBucket) + "/" + encodeURIComponent(file.name), {
+      method: "PUT",
+      headers: { "Content-Type": "application/octet-stream" },
+      body: buf
+    });
+    setStatus("Uploaded: " + file.name, "ok");
+    fileInput.value = "";
+    loadObjects();
+  } catch (e) {
+    setStatus("Upload failed: " + e.message, "error");
+  }
+}
+
+function downloadFile(key) {
+  const url = ENDPOINT + "/" + encodeURIComponent(currentBucket) + "/" + encodeURIComponent(key);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = key;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+const TEXT_EXT = ["txt","json","md","csv","log","yaml","yml","xml","html","css","js","py","sh","ini","conf"];
+const IMAGE_EXT = ["png","jpg","jpeg","gif","webp","svg","bmp"];
+
+function extOf(key) {
+  const parts = key.split(".");
+  return parts.length > 1 ? parts.pop().toLowerCase() : "";
+}
+
+async function inspectObject(key) {
+  const overlay = document.getElementById("overlay");
+  const title = document.getElementById("modalTitle");
+  const body = document.getElementById("modalBody");
+  const dlBtn = document.getElementById("modalDownloadBtn");
+  title.textContent = key;
+  body.innerHTML = "Loading...";
+  dlBtn.onclick = () => downloadFile(key);
+  overlay.classList.add("open");
+
+  const url = ENDPOINT + "/" + encodeURIComponent(currentBucket) + "/" + encodeURIComponent(key);
+  const ext = extOf(key);
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(res.status + " " + res.statusText);
+    const blob = await res.blob();
+    const sizeKb = (blob.size / 1024).toFixed(1);
+    const meta = `<div class="meta-row"><span>Size: ${sizeKb} KB</span><span>Type: ${blob.type || "unknown"}</span></div>`;
+
+    if (IMAGE_EXT.includes(ext)) {
+      const objUrl = URL.createObjectURL(blob);
+      body.innerHTML = meta + `<img src="${objUrl}" alt="${key}">`;
+    } else if (TEXT_EXT.includes(ext)) {
+      const text = await blob.text();
+      const escaped = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+      body.innerHTML = meta + `<pre>${escaped.slice(0, 20000)}</pre>`;
+    } else {
+      body.innerHTML = meta + `<div style="color:var(--muted)">No inline preview for this file type. Use Download to view it.</div>`;
+    }
+  } catch (e) {
+    body.innerHTML = `<div style="color:var(--danger)">Could not load object: ${e.message}</div>`;
+  }
+}
+
+function closeModal() {
+  document.getElementById("overlay").classList.remove("open");
+}
+
+async function deleteObject(key) {
+  if (!confirm(`Delete "${key}"?`)) return;
+  try {
+    await api("/" + encodeURIComponent(currentBucket) + "/" + encodeURIComponent(key), { method: "DELETE" });
+    setStatus("Deleted: " + key, "ok");
+    loadObjects();
+  } catch (e) {
+    setStatus("Could not delete object: " + e.message, "error");
+  }
+}
+
+async function loadUserInfo() {
+  try {
+    const res = await fetch("/api/me", { credentials: "include" });
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById("userEmailBadge").textContent = data.email || "User";
+    }
+  } catch (err) {}
+}
+
+async function logout() {
+  await fetch("/api/logout", { method: "POST", credentials: "include" });
+  window.location.href = "/";
+}
+
+loadUserInfo();
+renderBreadcrumb();
+renderToolbar();
+loadBuckets();
+</script>
+
+</body>
+</html>

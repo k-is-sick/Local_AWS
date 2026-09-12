@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Lambda Console — LocalAWS</title>
+<style>
+  :root {
+    --bg: #0e1117;
+    --panel: #161b22;
+    --border: #2a313c;
+    --text: #d6dde5;
+    --muted: #8b94a3;
+    --accent: #ff9900;
+    --danger: #e5534b;
+    --success: #3fb950;
+  }
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; }
+  
+  header {
+    background: var(--panel); border-bottom: 1px solid var(--border);
+    padding: 12px 24px; display: flex; align-items: center; gap: 14px;
+  }
+  .logo {
+    width: 28px; height: 28px; background: #e5534b; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; color: #fff; font-size: 14px;
+  }
+  header h1 { font-size: 15px; font-weight: 600; margin: 0; }
+  .nav-link { color: var(--muted); text-decoration: none; font-size: 13px; margin-left: 12px; }
+  .nav-link:hover { color: var(--text); }
+  .user-badge { margin-left: auto; font-size: 12px; color: var(--muted); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 12px; border: 1px solid var(--border); }
+
+  main { max-width: 1100px; margin: 32px auto; padding: 0 20px; }
+  .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .page-title { font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px; }
+  .badge-count { background: var(--border); font-size: 12px; padding: 2px 8px; border-radius: 10px; color: var(--text); }
+
+  .btn {
+    padding: 7px 16px; border: none; border-radius: 6px; cursor: pointer;
+    font-size: 13px; font-weight: 600; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #161616; }
+  .btn-primary:hover { background: #e68a00; }
+  .btn-secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--muted); }
+  .btn-danger { background: rgba(229, 83, 75, 0.15); color: var(--danger); border: 1px solid rgba(229, 83, 75, 0.3); }
+  .btn-danger:hover { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  .table-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th { background: rgba(255,255,255,0.02); padding: 12px 16px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); text-transform: uppercase; }
+  td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .func-name { font-weight: 600; color: #4da3ff; font-family: monospace; text-decoration: none; }
+  .func-name:hover { text-decoration: underline; }
+  .code-tag { font-family: monospace; font-size: 12px; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; color: #d6dde5; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(2px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    width: 580px; max-width: 90vw; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .modal-title { font-size: 18px; font-weight: 700; margin: 0 0 16px 0; display: flex; justify-content: space-between; }
+  .close-btn { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; }
+  
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px; color: var(--text); font-size: 13px; outline: none;
+  }
+  .form-group textarea { font-family: monospace; resize: vertical; }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+  /* Log Panel */
+  .log-box {
+    background: #000; border: 1px solid var(--border); border-radius: 6px; padding: 12px;
+    font-family: monospace; font-size: 12px; color: #3fb950; max-height: 180px; overflow-y: auto; white-space: pre-wrap;
+  }
+  .result-box {
+    background: #000; border: 1px solid var(--border); border-radius: 6px; padding: 12px;
+    font-family: monospace; font-size: 12px; color: #4da3ff; max-height: 180px; overflow-y: auto; white-space: pre-wrap;
+  }
+
+  .empty-state { padding: 48px; text-align: center; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">λ</div>
+  <h1>LocalAWS Lambda Console</h1>
+  <a class="nav-link" href="/services">← Services Directory</a>
+  <div class="user-badge"><span>●</span> <span id="userEmail">localaws</span></div>
+</header>
+
+<main>
+  <div class="page-header">
+    <div class="page-title">
+      <span>Lambda Functions</span>
+      <span class="badge-count" id="funcCount">0</span>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-secondary" onclick="loadFunctions()">Refresh</button>
+      <button class="btn btn-primary" onclick="openCreateModal()">+ Create function</button>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Function Name</th>
+          <th>Runtime</th>
+          <th>Handler</th>
+          <th>Timeout</th>
+          <th>Created At</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="funcTable">
+        <tr>
+          <td colspan="6" class="empty-state">Loading functions...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Create Function Modal -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span>Create Lambda Function</span>
+      <button class="close-btn" onclick="closeModal('createModal')">✕</button>
+    </div>
+    <form id="createForm" onsubmit="handleCreate(event)">
+      <div class="form-group">
+        <label>Function Name</label>
+        <input type="text" id="createName" required placeholder="e.g. my-first-function">
+      </div>
+      <div style="display:flex; gap:12px;">
+        <div class="form-group" style="flex:1">
+          <label>Runtime</label>
+          <select id="createRuntime">
+            <option value="python3.11">python3.11</option>
+            <option value="python3.10">python3.10</option>
+            <option value="nodejs20.x">nodejs20.x</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>Handler</label>
+          <input type="text" id="createHandler" value="handler.handler" required>
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>Timeout (sec)</label>
+          <input type="number" id="createTimeout" value="15" min="1" max="300">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Python Code (Inline)</label>
+        <textarea id="createCode" rows="8">def handler(event, context):
+    print("Received event:", event)
+    name = event.get("name", "World")
+    return {
+        "statusCode": 200,
+        "message": f"Hello {name} from LocalAWS Lambda!"
+    }
+</textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('createModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Deploy function</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Invoke Tester Modal -->
+<div class="modal-overlay" id="invokeModal">
+  <div class="modal" style="width:640px;">
+    <div class="modal-title">
+      <span>Invoke Function: <span id="invokeFuncName" style="color:var(--accent)"></span></span>
+      <button class="close-btn" onclick="closeModal('invokeModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Event Payload (JSON)</label>
+      <textarea id="invokePayload" rows="5">{\n  "name": "LocalAWS Developer",\n  "key": "value"\n}</textarea>
+    </div>
+    <div style="margin-bottom:16px;">
+      <button class="btn btn-primary" id="invokeBtn" onclick="executeInvoke()">⚡ Run Invocation</button>
+      <span id="invokeStatus" style="margin-left:10px; font-size:12px; color:var(--muted)"></span>
+    </div>
+    <div class="form-group">
+      <label>Execution Output (Payload)</label>
+      <div class="result-box" id="invokeResult">Click 'Run Invocation' to execute...</div>
+    </div>
+    <div class="form-group">
+      <label>Log Output (Stdout/Stderr)</label>
+      <div class="log-box" id="invokeLogs">—</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentInvokeName = '';
+
+async function loadFunctions() {
+  try {
+    const res = await fetch('/api/lambda/functions');
+    const data = await res.json();
+    const tbody = document.getElementById('funcTable');
+    const funcs = data.functions || [];
+    document.getElementById('funcCount').innerText = funcs.length;
+
+    if (funcs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No Lambda functions deployed yet. Click "+ Create function" to get started.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = funcs.map(f => `
+      <tr>
+        <td><a class="func-name" href="javascript:openInvokeModal('${f.name}')">λ ${f.name}</a></td>
+        <td><span class="code-tag">${f.runtime}</span></td>
+        <td><span class="code-tag">${f.handler}</span></td>
+        <td>${f.timeout}s</td>
+        <td style="color:var(--muted)">${f.created_at || 'Just now'}</td>
+        <td style="text-align:right">
+          <button class="btn btn-secondary btn-sm" onclick="openInvokeModal('${f.name}')">⚡ Test</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteFunction('${f.name}')">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    document.getElementById('funcTable').innerHTML = `<tr><td colspan="6" class="empty-state" style="color:var(--danger)">Failed to load functions: ${err.message}</td></tr>`;
+  }
+}
+
+function openCreateModal() {
+  document.getElementById('createModal').classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+async function handleCreate(e) {
+  e.preventDefault();
+  const payload = {
+    name: document.getElementById('createName').value.trim(),
+    runtime: document.getElementById('createRuntime').value,
+    handler: document.getElementById('createHandler').value.trim(),
+    timeout: parseInt(document.getElementById('createTimeout').value, 10),
+    code: document.getElementById('createCode').value
+  };
+
+  try {
+    const res = await fetch('/api/lambda/functions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      alert('Error creating function: ' + (err.error || 'Unknown error'));
+      return;
+    }
+    closeModal('createModal');
+    document.getElementById('createForm').reset();
+    loadFunctions();
+  } catch (err) {
+    alert('Failed to connect: ' + err.message);
+  }
+}
+
+async function deleteFunction(name) {
+  if (!confirm(`Are you sure you want to delete function '${name}'?`)) return;
+  try {
+    const res = await fetch(`/api/lambda/functions/${name}`, { method: 'DELETE' });
+    if (res.ok) {
+      loadFunctions();
+    } else {
+      const err = await res.json();
+      alert('Error deleting function: ' + (err.error || 'Unknown error'));
+    }
+  } catch (err) {
+    alert('Failed to delete: ' + err.message);
+  }
+}
+
+function openInvokeModal(name) {
+  currentInvokeName = name;
+  document.getElementById('invokeFuncName').innerText = name;
+  document.getElementById('invokeResult').innerText = "Click 'Run Invocation' to execute...";
+  document.getElementById('invokeLogs').innerText = "—";
+  document.getElementById('invokeStatus').innerText = "";
+  document.getElementById('invokeModal').classList.add('open');
+}
+
+async function executeInvoke() {
+  const btn = document.getElementById('invokeBtn');
+  const statusSpan = document.getElementById('invokeStatus');
+  btn.disabled = true;
+  statusSpan.innerText = "Running container execution...";
+
+  let payloadObj = {};
+  try {
+    payloadObj = JSON.parse(document.getElementById('invokePayload').value);
+  } catch (e) {
+    alert('Invalid JSON in event payload');
+    btn.disabled = false;
+    statusSpan.innerText = "";
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/lambda/functions/${currentInvokeName}/invoke`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payloadObj)
+    });
+
+    const data = await res.json();
+    btn.disabled = false;
+    statusSpan.innerText = `Duration: ${data.execution_time_ms || 0} ms | Status: ${res.status}`;
+
+    document.getElementById('invokeResult').innerText = JSON.stringify(data.payload || data.error || data, null, 2);
+    document.getElementById('invokeLogs').innerText = data.logs || 'No log output captured.';
+  } catch (err) {
+    btn.disabled = false;
+    statusSpan.innerText = "Execution failed";
+    document.getElementById('invokeResult').innerText = "Error: " + err.message;
+  }
+}
+
+loadFunctions();
+</script>
+</body>
+</html>

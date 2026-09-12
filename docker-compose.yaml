@@ -1,0 +1,125 @@
+services:
+  localaws:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DB_HOST=db
+      - DB_NAME=localaws
+      - DB_USER=localaws
+      - DB_PASSWORD=localaws
+      - SECRET_KEY=localaws-dev-secret
+      - IAM_URL=http://miniiam:4568
+      - LAMBDA_URL=http://minilambda:4569
+    ports:
+      - "4566:4566"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./storage:/app/storage"
+      - "./dynamodb_data:/app/dynamodb_data"
+      - "./templates:/app/templates"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - localaws
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=localaws
+      - POSTGRES_USER=localaws
+      - POSTGRES_PASSWORD=localaws
+    ports:
+      - "5432:5432"
+    volumes:
+      - "pgdata:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U localaws"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - localaws
+
+  miniec2:
+    build:
+      context: .
+      dockerfile: ec2/Dockerfile
+    ports:
+      - "4567:4567"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - IAM_URL=http://miniiam:4568
+    networks:
+      - localaws
+
+  miniiam:
+    build:
+      context: .
+      dockerfile: iam/Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DB_HOST=iamdb
+      - DB_NAME=localawsiam
+      - DB_USER=localawsiam
+      - DB_PASSWORD=localawsiam
+    ports:
+      - "4568:4568"
+    volumes:
+      - "./templates:/app/templates"
+    depends_on:
+      iamdb:
+        condition: service_healthy
+    networks:
+      - localaws
+
+  iamdb:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=localawsiam
+      - POSTGRES_USER=localawsiam
+      - POSTGRES_PASSWORD=localawsiam
+    volumes:
+      - "iamdata:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U localawsiam"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - localaws
+
+  minilambda:
+    build:
+      context: .
+      dockerfile: lambda/Dockerfile
+    ports:
+      - "4569:4569"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./functions:/app/functions"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - IAM_URL=http://miniiam:4568
+      - DB_HOST=db
+      - DB_NAME=localaws
+      - DB_USER=localaws
+      - DB_PASSWORD=localaws
+      - HOST_FUNCTIONS_DIR=${PWD}/functions
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - localaws
+
+volumes:
+  pgdata:
+  iamdata:
+
+networks:
+  localaws:
+    name: localaws

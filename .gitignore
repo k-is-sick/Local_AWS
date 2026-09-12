@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+localaws/
+.venv/
+
+# Environment & Secrets
+.env
+.env.local
+cookies.txt
+
+# Databases and Local Storage (Mounts)
+storage/
+!S3/storage/
+dynamodb_data/
+*.sqlite3
+
+# Logs & Temporary files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

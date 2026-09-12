@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services — LocalAWS Console</title>
+<style>
+  :root {
+    --bg: #0e1117;
+    --panel: #161b22;
+    --panel-hover: #1c2129;
+    --border: #2a313c;
+    --text: #d6dde5;
+    --muted: #8b94a3;
+    --accent: #ff9900;
+    --green: #3fb950;
+    --red: #f85149;
+    --amber: #d29922;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--panel);
+  }
+  .logo {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #161616;
+    font-size: 15px;
+    letter-spacing: -0.5px;
+  }
+  header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
+  .userinfo {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .userinfo button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .userinfo button:hover {
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  main {
+    max-width: 1050px;
+    margin: 48px auto;
+    padding: 0 24px;
+  }
+  .page-header {
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  main h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+  }
+  main .sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+  .card:hover {
+    border-color: rgba(255, 153, 0, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .card-top-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .icon-box {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    color: #161616;
+    letter-spacing: -0.3px;
+  }
+  .card h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .status-pill {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .status-running {
+    background: rgba(63, 185, 80, 0.15);
+    color: var(--green);
+    border: 1px solid rgba(63, 185, 80, 0.3);
+  }
+  .status-stopped {
+    background: rgba(248, 81, 73, 0.15);
+    color: var(--red);
+    border: 1px solid rgba(248, 81, 73, 0.3);
+  }
+  .status-starting {
+    background: rgba(210, 153, 34, 0.15);
+    color: var(--amber);
+    border: 1px solid rgba(210, 153, 34, 0.3);
+  }
+  .card-actions {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .btn-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .btn-link:hover {
+    background: var(--panel-hover);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .ctrl-btns {
+    display: flex;
+    gap: 6px;
+  }
+  .btn-ctrl {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    transition: all 0.15s;
+  }
+  .btn-start:hover:not(:disabled) {
+    background: rgba(63, 185, 80, 0.2);
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .btn-stop:hover:not(:disabled) {
+    background: rgba(248, 81, 73, 0.2);
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .btn-ctrl:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">L</div>
+  <h1>LocalAWS Console</h1>
+  <div class="userinfo">
+    <div class="user-badge">
+      <span>●</span>
+      <span>{{ email }}</span>
+    </div>
+    <button onclick="logout()">Sign out</button>
+  </div>
+</header>
+<main>
+  <div class="page-header">
+    <div>
+      <h2>Services Dashboard</h2>
+      <p class="sub">Monitor and control your local cloud microservices</p>
+    </div>
+  </div>
+  <div class="grid">
+
+    <!-- S3 Card -->
+    <div class="card" id="card-s3">
+      <div class="card-top">
+        <div class="card-top-left">
+          <div class="icon-box" style="background:#3fb950">S3</div>
+          <h3>S3 Storage</h3>
+        </div>
+        <span class="status-pill status-running" id="pill-s3">● Live</span>
+      </div>
+      <p>Scalable object storage for buckets and files</p>
+      <div class="card-actions">
+        <a class="btn-link" href="/s3console">Open Console →</a>
+        <span style="font-size:11px; color:var(--muted)">Built-in</span>
+      </div>
+    </div>
+
+    <!-- DynamoDB Card -->
+    <div class="card" id="card-dynamodb">
+      <div class="card-top">
+        <div class="card-top-left">
+          <div class="icon-box" style="background:#4da3ff; color:#fff;">DB</div>
+          <h3>DynamoDB</h3>
+        </div>
+        <span class="status-pill status-running" id="pill-dynamodb">● Live</span>
+      </div>
+      <p>Fast NoSQL key-value & document table database</p>
+      <div class="card-actions">
+        <a class="btn-link" href="/dynamodb">Open Console →</a>
+        <span style="font-size:11px; color:var(--muted)">Built-in</span>
+      </div>
+    </div>
+
+    <!-- EC2 Card -->
+    <div class="card" id="card-ec2">
+      <div class="card-top">
+        <div class="card-top-left">
+          <div class="icon-box" style="background:#ff9900">EC2</div>
+          <h3>EC2 Compute</h3>
+        </div>
+        <span class="status-pill status-running" id="pill-ec2">● Checking</span>
+      </div>
+      <p>Virtual compute instances and web terminal (:4567)</p>
+      <div class="card-actions">
+        <a class="btn-link" href="http://localhost:4567" target="_blank" id="link-ec2">Open Console →</a>
+        <div class="ctrl-btns">
+          <button class="btn-ctrl btn-start" onclick="controlService('ec2', 'start')" id="btn-start-ec2">Start</button>
+          <button class="btn-ctrl btn-stop" onclick="controlService('ec2', 'stop')" id="btn-stop-ec2">Stop</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- IAM Card -->
+    <div class="card" id="card-iam">
+      <div class="card-top">
+        <div class="card-top-left">
+          <div class="icon-box" style="background:#a371f7; color:#fff;">IAM</div>
+          <h3>IAM Identity</h3>
+        </div>
+        <span class="status-pill status-running" id="pill-iam">● Checking</span>
+      </div>
+      <p>Users, access keys, policies & authorization (:4568)</p>
+      <div class="card-actions">
+        <a class="btn-link" href="/iamconsole" id="link-iam">Open Console →</a>
+        <div class="ctrl-btns">
+          <button class="btn-ctrl btn-start" onclick="controlService('iam', 'start')" id="btn-start-iam">Start</button>
+          <button class="btn-ctrl btn-stop" onclick="controlService('iam', 'stop')" id="btn-stop-iam">Stop</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lambda Card -->
+    <div class="card" id="card-lambda">
+      <div class="card-top">
+        <div class="card-top-left">
+          <div class="icon-box" style="background:#e5534b; color:#fff;">λ</div>
+          <h3>Lambda</h3>
+        </div>
+        <span class="status-pill status-running" id="pill-lambda">● Checking</span>
+      </div>
+      <p>Serverless event-driven compute engine (:4569)</p>
+      <div class="card-actions">
+        <a class="btn-link" href="/lambdaconsole" id="link-lambda">Open Console →</a>
+        <div class="ctrl-btns">
+          <button class="btn-ctrl btn-start" onclick="controlService('lambda', 'start')" id="btn-start-lambda">Start</button>
+          <button class="btn-ctrl btn-stop" onclick="controlService('lambda', 'stop')" id="btn-stop-lambda">Stop</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+<script>
+async function logout() {
+  await fetch("/api/logout", { method: "POST", credentials: "include" });
+  window.location.href = "/";
+}
+
+async function pollStatus() {
+  try {
+    const res = await fetch("/api/services/status");
+    if (!res.ok) return;
+    const data = await res.json();
+    for (const [name, info] of Object.entries(data)) {
+      updateCardUI(name, info);
+    }
+  } catch (err) {
+    console.error("Failed to fetch service status", err);
+  }
+}
+
+function updateCardUI(name, info) {
+  const pill = document.getElementById(`pill-${name}`);
+  const startBtn = document.getElementById(`btn-start-${name}`);
+  const stopBtn = document.getElementById(`btn-stop-${name}`);
+  const link = document.getElementById(`link-${name}`);
+
+  if (!pill) return;
+
+  const status = info.status; // "running", "stopped", "starting"
+  if (status === "running") {
+    pill.className = "status-pill status-running";
+    pill.textContent = "● Running";
+    if (startBtn) startBtn.disabled = true;
+    if (stopBtn) stopBtn.disabled = false;
+    if (link) {
+      link.style.pointerEvents = "auto";
+      link.style.opacity = "1";
+    }
+  } else if (status === "starting") {
+    pill.className = "status-pill status-starting";
+    pill.textContent = "● Starting...";
+    if (startBtn) startBtn.disabled = true;
+    if (stopBtn) stopBtn.disabled = true;
+  } else {
+    pill.className = "status-pill status-stopped";
+    pill.textContent = "● Stopped";
+    if (startBtn) startBtn.disabled = false;
+    if (stopBtn) stopBtn.disabled = true;
+    if (link) {
+      link.style.pointerEvents = "none";
+      link.style.opacity = "0.5";
+    }
+  }
+}
+
+async function controlService(name, action) {
+  const startBtn = document.getElementById(`btn-start-${name}`);
+  const stopBtn = document.getElementById(`btn-stop-${name}`);
+  if (startBtn) startBtn.disabled = true;
+  if (stopBtn) stopBtn.disabled = true;
+  
+  const pill = document.getElementById(`pill-${name}`);
+  if (pill) {
+    pill.className = "status-pill status-starting";
+    pill.textContent = action === "start" ? "● Starting..." : "● Stopping...";
+  }
+
+  try {
+    const res = await fetch(`/api/services/${name}/${action}`, { method: "POST" });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.error || `Failed to ${action} ${name}`);
+    }
+  } catch (err) {
+    alert(`Error sending ${action} to ${name}`);
+  } finally {
+    setTimeout(pollStatus, 1000);
+  }
+}
+
+pollStatus();
+setInterval(pollStatus, 3000);
+</script>
+</body>
+</html>

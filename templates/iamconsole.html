@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LocalAWS Console — IAM</title>
+<style>
+  :root {
+    --bg: #0e1117;
+    --panel: #161b22;
+    --panel-hover: #1f242c;
+    --border: #2a313c;
+    --text: #d6dde5;
+    --muted: #8b94a3;
+    --accent: #a371f7;
+    --accent-orange: #ff9900;
+    --danger: #e5534b;
+    --ok: #3fb950;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--panel);
+  }
+  .logo {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #fff;
+    font-size: 12px;
+    letter-spacing: -0.5px;
+  }
+  header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
+  .nav-back {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    margin-left: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .nav-back:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .userinfo {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .user-badge {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 12px;
+  }
+  .userinfo button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .userinfo button:hover {
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 28px auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .panel h2 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  input, select, textarea {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  input { flex: 1; }
+  textarea {
+    width: 100%;
+    height: 100px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 12px;
+    resize: vertical;
+  }
+
+  button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    background: var(--panel);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+  button.primary:hover { opacity: 0.92; }
+  button.danger { color: var(--danger); }
+  button.danger:hover { border-color: var(--danger); background: rgba(229, 83, 75, 0.1); }
+  button.sm { padding: 3px 8px; font-size: 11px; }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+    padding: 9px 12px;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .key-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+  .key-active { border-color: rgba(63, 185, 80, 0.4); color: #3fb950; }
+  .key-inactive { color: var(--muted); }
+
+  .policy-doc {
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--panel);
+    padding: 6px 8px;
+    border-radius: 4px;
+    max-height: 90px;
+    overflow-y: auto;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .preset-bar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .status {
+    font-size: 12px;
+    min-height: 18px;
+  }
+  .status.ok { color: var(--ok); }
+  .status.error { color: var(--danger); }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.65);
+    backdrop-filter: blur(2px);
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 480px;
+    max-width: 90vw;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .secret-box {
+    background: rgba(255, 153, 0, 0.1);
+    border: 1px solid rgba(255, 153, 0, 0.4);
+    padding: 12px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 12px;
+    word-break: break-all;
+    margin: 12px 0;
+    color: #ffb84d;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">IAM</div>
+  <h1>LocalAWS Console — IAM</h1>
+  <a class="nav-back" href="http://localhost:4566/services">← Services</a>
+  <div class="userinfo">
+    <div class="user-badge" id="userEmailBadge">Identity & Access</div>
+    <button onclick="logout()">Sign out</button>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT: Users & Access Keys -->
+  <div class="panel">
+    <h2>
+      <span>Users & Access Keys</span>
+      <span id="userCountBadge" style="font-size: 11px; color: var(--muted);"></span>
+    </h2>
+
+    <div class="form-row">
+      <input type="text" id="newUsername" placeholder="Enter IAM username (e.g. developer)">
+      <button class="primary" onclick="createUser()">+ Create User</button>
+    </div>
+    <div class="status" id="userStatus"></div>
+
+    <div class="table-wrap">
+      <table id="usersTable">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Access Keys</th>
+            <th>Policies</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="usersBody">
+          <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Loading users...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RIGHT: Policies -->
+  <div class="panel">
+    <h2>
+      <span>Policies</span>
+      <span id="policyCountBadge" style="font-size: 11px; color: var(--muted);"></span>
+    </h2>
+
+    <div class="preset-bar">
+      <span>Templates:</span>
+      <button class="sm" onclick="setPolicyTemplate('Admin')">Admin</button>
+      <button class="sm" onclick="setPolicyTemplate('S3')">S3 Full</button>
+      <button class="sm" onclick="setPolicyTemplate('DynamoDB')">DynamoDB Full</button>
+      <button class="sm" onclick="setPolicyTemplate('EC2')">EC2 Full</button>
+      <button class="sm" onclick="setPolicyTemplate('Lambda')">Lambda Full</button>
+      <button class="sm" onclick="setPolicyTemplate('ReadOnly')">ReadOnly</button>
+    </div>
+
+    <input type="text" id="policyName" placeholder="Policy Name (e.g. S3FullAccess)">
+    <textarea id="policyDoc" placeholder='{"Version":"2026-01-01","Statement":[{"Effect":"Allow","Action":["*"],"Resource":["*"]}]}'></textarea>
+    <div style="font-size:11px;color:var(--muted);margin-top:-10px;">
+      Action hints: 
+      <span style="font-family:monospace;">
+        <select id="actionHint" style="font-size:11px;padding:2px 4px;" onchange="insertAction(this.value)">
+          <option value="">— pick an action —</option>
+          <optgroup label="S3">
+            <option>s3:CreateBucket</option><option>s3:DeleteBucket</option>
+            <option>s3:ListAllMyBuckets</option><option>s3:ListBucket</option>
+            <option>s3:PutObject</option><option>s3:GetObject</option><option>s3:DeleteObject</option>
+            <option>s3:GetBucketNotification</option><option>s3:PutBucketNotification</option>
+            <option>s3:*</option>
+          </optgroup>
+          <optgroup label="DynamoDB">
+            <option>dynamodb:CreateTable</option><option>dynamodb:DeleteTable</option>
+            <option>dynamodb:DescribeTable</option><option>dynamodb:ListTables</option>
+            <option>dynamodb:PutItem</option><option>dynamodb:GetItem</option>
+            <option>dynamodb:DeleteItem</option><option>dynamodb:Scan</option>
+            <option>dynamodb:*</option>
+          </optgroup>
+          <optgroup label="EC2">
+            <option>ec2:RunInstance</option><option>ec2:StopInstance</option>
+            <option>ec2:StartInstance</option><option>ec2:TerminateInstance</option>
+            <option>ec2:*</option>
+          </optgroup>
+          <optgroup label="Lambda">
+            <option>lambda:CreateFunction</option><option>lambda:DeleteFunction</option>
+            <option>lambda:GetFunction</option><option>lambda:ListFunctions</option>
+            <option>lambda:InvokeFunction</option>
+            <option>lambda:*</option>
+          </optgroup>
+        </select>
+      </span>
+    </div>
+    
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="primary" onclick="createPolicy()">+ Create Policy</button>
+    </div>
+    <div class="status" id="policyStatus"></div>
+
+    <div class="table-wrap">
+      <table id="policiesTable">
+        <thead>
+          <tr>
+            <th>Policy Name</th>
+            <th>Document</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="policiesBody">
+          <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px;">Loading policies...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Key Created Modal -->
+<div class="modal-overlay" id="keyModal">
+  <div class="modal">
+    <h3 style="margin:0 0 10px;font-size:16px;color:#3fb950;">✔ Access Key Generated</h3>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 10px;">Save these credentials now. The secret access key will not be shown again.</p>
+    
+    <label style="font-size:11px;color:var(--muted);">Access Key ID</label>
+    <div class="secret-box" id="modalAkid"></div>
+
+    <label style="font-size:11px;color:var(--muted);">Secret Access Key</label>
+    <div class="secret-box" id="modalSecret"></div>
+
+    <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+      <button class="primary" onclick="closeKeyModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRESETS = {
+  Admin: {
+    name: "AdministratorAccess",
+    doc: {
+      Version: "2026-01-01",
+      Statement: [{ Effect: "Allow", Action: ["*"], Resource: ["*"] }]
+    }
+  },
+  S3: {
+    name: "AmazonS3FullAccess",
+    doc: {
+      Version: "2026-01-01",
+      Statement: [{ Effect: "Allow", Action: ["s3:*"], Resource: ["arn:localaws:s3:::*"] }]
+    }
+  },
+  DynamoDB: {
+    name: "AmazonDynamoDBFullAccess",
+    doc: {
+      Version: "2026-01-01",
+      Statement: [{ Effect: "Allow", Action: ["dynamodb:*"], Resource: ["arn:localaws:dynamodb:::*"] }]
+    }
+  },
+  EC2: {
+    name: "AmazonEC2FullAccess",
+    doc: {
+      Version: "2026-01-01",
+      Statement: [{ Effect: "Allow", Action: ["ec2:*"], Resource: ["arn:localaws:ec2:::*"] }]
+    }
+  },
+  Lambda: {
+    name: "AWSLambdaFullAccess",
+    doc: {
+      Version: "2026-01-01",
+      Statement: [{ Effect: "Allow", Action: ["lambda:*"], Resource: ["arn:localaws:lambda:::function/*"] }]
+    }
+  },
+  ReadOnly: {
+    name: "ReadOnlyAccess",
+    doc: {
+      Version: "2026-01-01",
+      Statement: [{
+        Effect: "Allow",
+        Action: [
+          "s3:GetObject", "s3:ListAllMyBuckets", "s3:ListBucket",
+          "dynamodb:GetItem", "dynamodb:Scan", "dynamodb:ListTables", "dynamodb:DescribeTable",
+          "lambda:ListFunctions", "lambda:GetFunction"
+        ],
+        Resource: ["*"]
+      }]
+    }
+  }
+};
+
+function setPolicyTemplate(type) {
+  const p = PRESETS[type];
+  if (!p) return;
+  document.getElementById("policyName").value = p.name;
+  document.getElementById("policyDoc").value = JSON.stringify(p.doc, null, 2);
+}
+
+function insertAction(val) {
+  if (!val) return;
+  const ta = document.getElementById("policyDoc");
+  // If the textarea already has valid JSON with an Action array, append to it
+  try {
+    const doc = JSON.parse(ta.value);
+    const stmt = doc.Statement && doc.Statement[0];
+    if (stmt && Array.isArray(stmt.Action) && !stmt.Action.includes(val)) {
+      stmt.Action.push(val);
+      ta.value = JSON.stringify(doc, null, 2);
+      document.getElementById("actionHint").value = "";
+      return;
+    }
+  } catch (e) {}
+  // Fallback: just set a starter doc
+  document.getElementById("policyDoc").value = JSON.stringify({
+    Version: "2026-01-01",
+    Statement: [{ Effect: "Allow", Action: [val], Resource: ["*"] }]
+  }, null, 2);
+  document.getElementById("actionHint").value = "";
+}
+
+function setStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg || "";
+  el.className = "status" + (type ? " " + type : "");
+}
+
+async function api(path, method='GET', body=null) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const res = await fetch(path, opts);
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      return { error: errData.error || `HTTP ${res.status} ${res.statusText}` };
+    }
+    return await res.json();
+  } catch (err) {
+    return { error: "Network connection failed" };
+  }
+}
+
+async function loadUserInfo() {
+  try {
+    const res = await fetch("/api/me", { credentials: "include" });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.email) document.getElementById("userEmailBadge").textContent = data.email;
+    }
+  } catch (err) {}
+}
+
+async function logout() {
+  await fetch("/api/logout", { method: "POST", credentials: "include" });
+  window.location.href = "http://localhost:4566/";
+}
+
+async function loadUsers() {
+  const users = await api('/api/iam/users');
+  const tbody = document.getElementById('usersBody');
+  const countBadge = document.getElementById('userCountBadge');
+  
+  if (users.error || !Array.isArray(users)) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--danger);padding:18px;">${users.error || "Could not load users"}</td></tr>`;
+    return;
+  }
+
+  countBadge.textContent = `${users.length} total`;
+  if (users.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">No users created yet.</td></tr>`;
+    return;
+  }
+
+  const policies = await api('/api/iam/policies');
+  const policyList = Array.isArray(policies) ? policies : [];
+
+  tbody.innerHTML = '';
+  for (const u of users) {
+    const keys = await api(`/api/iam/users/${u.id}/keys`);
+    const keyList = Array.isArray(keys) ? keys : [];
+    
+    const keyHtml = keyList.length === 0
+      ? `<span style="color:var(--muted);font-size:12px;">No keys</span>`
+      : keyList.map(k => `
+          <div class="key-chip ${k.active ? 'key-active' : 'key-inactive'}">
+            <span>${k.access_key_id}</span>
+          </div>`).join("");
+
+    const policyOptions = policyList.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <strong style="color:var(--text);">${u.username}</strong>
+        <div style="font-size:11px;color:var(--muted);">ID: ${u.id}</div>
+      </td>
+      <td>
+        ${keyHtml}
+        <div><button class="sm" onclick="createKey(${u.id})">+ Generate Key</button></div>
+      </td>
+      <td>
+        ${policyList.length > 0 ? `
+          <div style="display:flex;gap:4px;margin-bottom:6px;">
+            <select id="policySel${u.id}" style="padding:4px 6px;font-size:12px;">${policyOptions}</select>
+            <button class="sm" onclick="attachPolicy(${u.id})">Attach</button>
+          </div>
+        ` : `<span style="color:var(--muted);font-size:12px;">No policies available</span>`}
+      </td>
+      <td style="text-align:right;">
+        <button class="danger sm" onclick="deleteUser(${u.id}, '${u.username}')">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function loadPolicies() {
+  const policies = await api('/api/iam/policies');
+  const tbody = document.getElementById('policiesBody');
+  const countBadge = document.getElementById('policyCountBadge');
+
+  if (policies.error || !Array.isArray(policies)) {
+    tbody.innerHTML = `<tr><td colspan="3" style="color:var(--danger);padding:18px;">${policies.error || "Could not load policies"}</td></tr>`;
+    return;
+  }
+
+  countBadge.textContent = `${policies.length} total`;
+  if (policies.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px;">No policies created yet. Use a template above.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  for (const p of policies) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${p.name}</strong></td>
+      <td><pre class="policy-doc">${JSON.stringify(p.document, null, 2)}</pre></td>
+      <td style="text-align:right;">
+        <button class="danger sm" onclick="deletePolicy(${p.id}, '${p.name}')">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function createUser() {
+  const input = document.getElementById('newUsername');
+  const username = input.value.trim();
+  if (!username) { setStatus('userStatus', 'Enter a username first', 'error'); return; }
+  const res = await api('/api/iam/users', 'POST', { username });
+  if (res.error) { setStatus('userStatus', res.error, 'error'); return; }
+  input.value = '';
+  setStatus('userStatus', `User "${username}" created`, 'ok');
+  loadUsers();
+}
+
+async function deleteUser(id, name) {
+  if (!confirm(`Delete user "${name}" and all associated access keys?`)) return;
+  const res = await api(`/api/iam/users/${id}`, 'DELETE');
+  if (res.error) { alert(res.error); return; }
+  setStatus('userStatus', `User deleted`, 'ok');
+  loadUsers();
+}
+
+async function createKey(userId) {
+  const key = await api(`/api/iam/users/${userId}/keys`, 'POST');
+  if (key.error) { alert(key.error); return; }
+  document.getElementById('modalAkid').textContent = key.access_key_id;
+  document.getElementById('modalSecret').textContent = key.secret_key;
+  document.getElementById('keyModal').classList.add('open');
+  loadUsers();
+}
+
+function closeKeyModal() {
+  document.getElementById('keyModal').classList.remove('open');
+}
+
+async function createPolicy() {
+  const name = document.getElementById('policyName').value.trim();
+  const docText = document.getElementById('policyDoc').value.trim();
+  if (!name || !docText) { setStatus('policyStatus', 'Policy name and document required', 'error'); return; }
+  let docObj;
+  try {
+    docObj = JSON.parse(docText);
+  } catch (e) {
+    setStatus('policyStatus', 'Invalid JSON syntax in policy document', 'error');
+    return;
+  }
+  const res = await api('/api/iam/policies', 'POST', { name, document: docObj });
+  if (res.error) { setStatus('policyStatus', res.error, 'error'); return; }
+  document.getElementById('policyName').value = '';
+  document.getElementById('policyDoc').value = '';
+  setStatus('policyStatus', `Policy "${name}" created`, 'ok');
+  loadPolicies();
+  loadUsers();
+}
+
+async function deletePolicy(id, name) {
+  if (!confirm(`Delete policy "${name}"?`)) return;
+  const res = await api(`/api/iam/policies/${id}`, 'DELETE');
+  if (res.error) { alert(res.error); return; }
+  setStatus('policyStatus', `Policy deleted`, 'ok');
+  loadPolicies();
+  loadUsers();
+}
+
+async function attachPolicy(userId) {
+  const sel = document.getElementById(`policySel${userId}`);
+  const policyId = sel.value;
+  if (!policyId) return;
+  const res = await api(`/api/iam/users/${userId}/policies/${policyId}`, 'PUT');
+  if (res.error) { alert(res.error); return; }
+  setStatus('userStatus', 'Policy attached successfully', 'ok');
+  loadUsers();
+}
+
+loadUserInfo();
+loadUsers();
+loadPolicies();
+</script>
+</body>
+</html>
