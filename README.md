@@ -45,7 +45,7 @@ Double-click `LocalAWS.exe`. It checks Docker is running, builds and starts ever
 **Option B — from source:**
 
 ```bash
-git clone https://github.com/k-is-sick/LocalAWS.git
+git clone https://github.com/k-is-sick/Local_AWS.git
 cd LocalAWS
 docker-compose up -d --build
 ```
