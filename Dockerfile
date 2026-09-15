@@ -6,6 +6,7 @@ COPY shared/ shared/
 COPY s3/ s3/
 COPY dynamodb/ dynamodb/
 COPY templates/ templates/
+COPY static/ static/
 COPY app.py .
 EXPOSE 4566
 CMD ["python", "app.py"]

@@ -1,446 +1,604 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Services — LocalAWS Console</title>
-<style>
-  :root {
-    --bg: #0e1117;
-    --panel: #161b22;
-    --panel-hover: #1c2129;
-    --border: #2a313c;
-    --text: #d6dde5;
-    --muted: #8b94a3;
-    --accent: #ff9900;
-    --green: #3fb950;
-    --red: #f85149;
-    --amber: #d29922;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
-  header {
-    padding: 14px 28px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--panel);
-  }
-  .logo {
-    width: 32px;
-    height: 32px;
-    background: var(--accent);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    color: #161616;
-    font-size: 15px;
-    letter-spacing: -0.5px;
-  }
-  header h1 {
-    font-size: 16px;
-    font-weight: 600;
-    margin: 0;
-    letter-spacing: -0.2px;
-  }
-  .userinfo {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  .user-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 4px 10px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
-  .userinfo button {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .userinfo button:hover {
-    border-color: var(--accent);
-    color: #fff;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LocalAWS Console — Services Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-main: #0e1117;
+      --bg-surface: #161b22;
+      --bg-surface-hover: #1c2129;
+      --bg-card: #1f242d;
+      --border-default: #2e3745;
+      --border-subtle: #242b35;
+      --text-primary: #d6dde5;
+      --text-muted: #8b94a3;
+      --accent-orange: #ff9900;
+      --status-running: #3fb950;
+      --status-running-bg: rgba(63, 185, 80, 0.12);
+      --status-checking: #d29922;
+      --status-checking-bg: rgba(210, 153, 34, 0.12);
+      --status-stopped: #f85149;
+      --status-stopped-bg: rgba(248, 81, 73, 0.12);
+      --font-sans: 'IBM Plex Sans', -apple-system, sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: inherit; text-decoration: none; }
+    .global-header {
+      height: 48px;
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .logo-mark {
+      width: 24px;
+      height: 24px;
+      background-color: var(--accent-orange);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0e1117;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .brand-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .env-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-orange);
+      background: rgba(255, 153, 0, 0.1);
+      border: 1px solid rgba(255, 153, 0, 0.3);
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+    .user-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--status-running);
+    }
+    .btn-signout {
+      background: transparent;
+      border: 1px solid var(--border-default);
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-signout:hover {
+      background: var(--bg-surface-hover);
+      color: #ffffff;
+      border-color: var(--accent-orange);
+    }
+    .container {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px;
+      flex: 1;
+    }
+    .page-title-block { margin-bottom: 28px; }
+    .page-title-block h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+    .page-title-block p { color: var(--text-muted); font-size: 13px; }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 18px;
+    }
+    .service-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.15s ease;
+    }
+    .service-card:hover {
+      border-color: var(--accent-orange);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-identity { display: flex; align-items: center; gap: 10px; }
+    .service-chip {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+    .chip-s3 { background: rgba(63, 185, 80, 0.14); border-color: rgba(63, 185, 80, 0.35); color: #3fb950; }
+    .chip-dynamodb { background: rgba(56, 139, 253, 0.14); border-color: rgba(56, 139, 253, 0.35); color: #58a6ff; }
+    .chip-ec2 { background: rgba(255, 153, 0, 0.14); border-color: rgba(255, 153, 0, 0.35); color: #ff9900; }
+    .chip-iam { background: rgba(163, 113, 247, 0.14); border-color: rgba(163, 113, 247, 0.35); color: #bc8cff; }
+    .chip-lambda { background: rgba(248, 81, 73, 0.14); border-color: rgba(248, 81, 73, 0.35); color: #f85149; }
 
-  main {
-    max-width: 1050px;
-    margin: 48px auto;
-    padding: 0 24px;
-  }
-  .page-header {
-    margin-bottom: 28px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-  }
-  main h2 {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0 0 6px 0;
-  }
-  main .sub {
-    color: var(--muted);
-    font-size: 14px;
-    margin: 0;
-  }
+    .service-name { font-size: 15px; font-weight: 600; color: #ffffff; }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+    }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .status-pill.running, .status-pill.status-running {
+      background-color: var(--status-running-bg);
+      border-color: rgba(63, 185, 80, 0.35);
+      color: var(--status-running);
+    }
+    .status-pill.running .status-dot, .status-pill.status-running .status-dot { background-color: var(--status-running); }
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-  }
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 22px;
-    color: var(--text);
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-    position: relative;
-  }
-  .card:hover {
-    border-color: rgba(255, 153, 0, 0.4);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  }
-  .card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-  }
-  .card-top-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .icon-box {
-    width: 42px;
-    height: 42px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 14px;
-    color: #161616;
-    letter-spacing: -0.3px;
-  }
-  .card h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-  }
-  .card p {
-    margin: 0;
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.45;
-  }
-  .status-pill {
-    font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .status-running {
-    background: rgba(63, 185, 80, 0.15);
-    color: var(--green);
-    border: 1px solid rgba(63, 185, 80, 0.3);
-  }
-  .status-stopped {
-    background: rgba(248, 81, 73, 0.15);
-    color: var(--red);
-    border: 1px solid rgba(248, 81, 73, 0.3);
-  }
-  .status-starting {
-    background: rgba(210, 153, 34, 0.15);
-    color: var(--amber);
-    border: 1px solid rgba(210, 153, 34, 0.3);
-  }
-  .card-actions {
-    margin-top: auto;
-    padding-top: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .btn-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font-size: 12px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.15s;
-  }
-  .btn-link:hover {
-    background: var(--panel-hover);
-    border-color: var(--accent);
-    color: #fff;
-  }
-  .ctrl-btns {
-    display: flex;
-    gap: 6px;
-  }
-  .btn-ctrl {
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--text);
-    transition: all 0.15s;
-  }
-  .btn-start:hover:not(:disabled) {
-    background: rgba(63, 185, 80, 0.2);
-    border-color: var(--green);
-    color: var(--green);
-  }
-  .btn-stop:hover:not(:disabled) {
-    background: rgba(248, 81, 73, 0.2);
-    border-color: var(--red);
-    color: var(--red);
-  }
-  .btn-ctrl:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-</style>
+    .status-pill.checking, .status-pill.status-starting, .status-pill.starting {
+      background-color: var(--status-checking-bg);
+      border-color: rgba(210, 153, 34, 0.35);
+      color: var(--status-checking);
+    }
+    .status-pill.checking .status-dot, .status-pill.status-starting .status-dot, .status-pill.starting .status-dot { background-color: var(--status-checking); }
+
+    .status-pill.stopped, .status-pill.status-stopped {
+      background-color: var(--status-stopped-bg);
+      border-color: rgba(248, 81, 73, 0.35);
+      color: var(--status-stopped);
+    }
+    .status-pill.stopped .status-dot, .status-pill.status-stopped .status-dot { background-color: var(--status-stopped); }
+
+    .card-meta { display: flex; flex-direction: column; gap: 8px; }
+    .card-desc { color: var(--text-muted); font-size: 12.5px; line-height: 1.45; }
+    .port-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .port-value {
+      font-family: var(--font-mono);
+      color: var(--accent-orange);
+      font-size: 11.5px;
+      background: rgba(255, 153, 0, 0.08);
+      padding: 1px 6px;
+      border-radius: 2px;
+      border: 1px solid rgba(255, 153, 0, 0.2);
+    }
+    .card-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: rgba(14, 17, 23, 0.4);
+      border-bottom-left-radius: 6px;
+      border-bottom-right-radius: 6px;
+    }
+    .link-console {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent-orange);
+      transition: color 0.15s ease;
+    }
+    .link-console:hover { color: #ffaa22; }
+    .card-actions { display: flex; align-items: center; gap: 6px; }
+    .builtin-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--bg-main);
+      border: 1px solid var(--border-subtle);
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+    .btn-ctrl {
+      background: transparent;
+      border: 1px solid var(--border-default);
+      font-family: var(--font-sans);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-start { border-color: rgba(63, 185, 80, 0.4); color: var(--status-running); }
+    .btn-start:hover:not(:disabled) { background: var(--status-running-bg); border-color: var(--status-running); }
+    .btn-stop { border-color: rgba(248, 81, 73, 0.4); color: var(--status-stopped); }
+    .btn-stop:hover:not(:disabled) { background: var(--status-stopped-bg); border-color: var(--status-stopped); }
+    .btn-ctrl:disabled { opacity: 0.35; cursor: not-allowed; }
+    .system-strip {
+      margin-top: 32px;
+      padding: 14px 20px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .system-info { display: flex; align-items: center; gap: 24px; font-size: 12px; color: var(--text-muted); }
+    .system-stat-item { display: inline-flex; align-items: center; gap: 8px; }
+    .stat-k { text-transform: uppercase; font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); }
+    .stat-v { font-family: var(--font-mono); color: var(--text-primary); font-weight: 500; }
+    .daemon-indicator { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 12px; color: var(--status-running); }
+    .daemon-indicator .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background-color: var(--status-running); }
+  </style>
 </head>
 <body>
-<header>
-  <div class="logo">L</div>
-  <h1>LocalAWS Console</h1>
-  <div class="userinfo">
-    <div class="user-badge">
-      <span>●</span>
-      <span>{{ email }}</span>
-    </div>
-    <button onclick="logout()">Sign out</button>
-  </div>
-</header>
-<main>
-  <div class="page-header">
-    <div>
-      <h2>Services Dashboard</h2>
-      <p class="sub">Monitor and control your local cloud microservices</p>
-    </div>
-  </div>
-  <div class="grid">
 
-    <!-- S3 Card -->
-    <div class="card" id="card-s3">
-      <div class="card-top">
-        <div class="card-top-left">
-          <div class="icon-box" style="background:#3fb950">S3</div>
-          <h3>S3 Storage</h3>
+  <header class="global-header">
+    <div class="header-left">
+      <a href="/services" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
+        <img src="/static/images/Local_AWS_logo.png" alt="LocalAWS Logo" style="height:44px; width:auto; display:block; object-fit:contain;">
+        <div class="brand-title">
+          LocalAWS Console
+          <span class="env-badge">v1.10</span>
         </div>
-        <span class="status-pill status-running" id="pill-s3">● Live</span>
+      </a>
+    </div>
+    <div class="header-right">
+      <div class="user-badge" title="Signed in user">
+        <span class="user-badge-dot"></span>
+        <span id="user-email-display">{{ email }}</span>
       </div>
-      <p>Scalable object storage for buckets and files</p>
-      <div class="card-actions">
-        <a class="btn-link" href="/s3console">Open Console →</a>
-        <span style="font-size:11px; color:var(--muted)">Built-in</span>
-      </div>
+      <button class="btn-signout" onclick="logout()" title="End session">Sign out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    
+    <div class="page-title-block">
+      <h1>Services Dashboard</h1>
+      <p>Monitor and control your local cloud microservices.</p>
     </div>
 
-    <!-- DynamoDB Card -->
-    <div class="card" id="card-dynamodb">
-      <div class="card-top">
-        <div class="card-top-left">
-          <div class="icon-box" style="background:#4da3ff; color:#fff;">DB</div>
-          <h3>DynamoDB</h3>
+    <div class="services-grid">
+
+      <!-- CARD 1: S3 Storage -->
+      <div class="service-card" id="card-s3">
+        <div class="card-body">
+          <div class="card-top-row">
+            <div class="card-identity">
+              <div class="service-chip chip-s3">S3</div>
+              <h3 class="service-name">S3 Storage</h3>
+            </div>
+            <div class="status-pill running" id="pill-s3">
+              <span class="status-dot"></span>
+              <span>running</span>
+            </div>
+          </div>
+          <div class="card-meta">
+            <p class="card-desc">Scalable object storage engine for buckets, key prefixes, and multipart file uploads.</p>
+            <div class="port-indicator">
+              <span>Port:</span>
+              <span class="port-value">:4566</span>
+            </div>
+          </div>
         </div>
-        <span class="status-pill status-running" id="pill-dynamodb">● Live</span>
+        <div class="card-footer">
+          <a href="/s3console" class="link-console" id="link-s3">
+            Open Console <i class="fa-solid fa-arrow-right"></i>
+          </a>
+          <div class="card-actions">
+            <span class="builtin-label">Built-in</span>
+          </div>
+        </div>
       </div>
-      <p>Fast NoSQL key-value & document table database</p>
-      <div class="card-actions">
-        <a class="btn-link" href="/dynamodb">Open Console →</a>
-        <span style="font-size:11px; color:var(--muted)">Built-in</span>
+
+      <!-- CARD 2: DynamoDB -->
+      <div class="service-card" id="card-dynamodb">
+        <div class="card-body">
+          <div class="card-top-row">
+            <div class="card-identity">
+              <div class="service-chip chip-dynamodb">DDB</div>
+              <h3 class="service-name">DynamoDB</h3>
+            </div>
+            <div class="status-pill running" id="pill-dynamodb">
+              <span class="status-dot"></span>
+              <span>running</span>
+            </div>
+          </div>
+          <div class="card-meta">
+            <p class="card-desc">NoSQL key-value database engine supporting secondary indexes, conditional writes, and query scans.</p>
+            <div class="port-indicator">
+              <span>Port:</span>
+              <span class="port-value">:4566</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="/dynamodb" class="link-console" id="link-dynamodb">
+            Open Console <i class="fa-solid fa-arrow-right"></i>
+          </a>
+          <div class="card-actions">
+            <span class="builtin-label">Built-in</span>
+          </div>
+        </div>
       </div>
+
+      <!-- CARD 3: EC2 Compute -->
+      <div class="service-card" id="card-ec2">
+        <div class="card-body">
+          <div class="card-top-row">
+            <div class="card-identity">
+              <div class="service-chip chip-ec2">EC2</div>
+              <h3 class="service-name">EC2 Compute</h3>
+            </div>
+            <div class="status-pill checking" id="pill-ec2">
+              <span class="status-dot"></span>
+              <span>checking</span>
+            </div>
+          </div>
+          <div class="card-meta">
+            <p class="card-desc">Local virtual container hypervisor with metadata endpoint emulation.</p>
+            <div class="port-indicator">
+              <span>Port:</span>
+              <span class="port-value">:4567</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="http://localhost:4567" class="link-console" id="link-ec2" target="_blank" rel="noopener noreferrer">
+            Open Console <i class="fa-solid fa-arrow-right"></i>
+          </a>
+          <div class="card-actions">
+            <button class="btn-ctrl btn-start" id="btn-start-ec2" onclick="controlService('ec2', 'start')">Start</button>
+            <button class="btn-ctrl btn-stop" id="btn-stop-ec2" onclick="controlService('ec2', 'stop')">Stop</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 4: IAM Identity -->
+      <div class="service-card" id="card-iam">
+        <div class="card-body">
+          <div class="card-top-row">
+            <div class="card-identity">
+              <div class="service-chip chip-iam">IAM</div>
+              <h3 class="service-name">IAM Identity</h3>
+            </div>
+            <div class="status-pill checking" id="pill-iam">
+              <span class="status-dot"></span>
+              <span>checking</span>
+            </div>
+          </div>
+          <div class="card-meta">
+            <p class="card-desc">Local identity provider, ARN policy evaluation engine, and access key credential store.</p>
+            <div class="port-indicator">
+              <span>Port:</span>
+              <span class="port-value">:4568</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="/iamconsole" class="link-console" id="link-iam">
+            Open Console <i class="fa-solid fa-arrow-right"></i>
+          </a>
+          <div class="card-actions">
+            <button class="btn-ctrl btn-start" id="btn-start-iam" onclick="controlService('iam', 'start')">Start</button>
+            <button class="btn-ctrl btn-stop" id="btn-stop-iam" onclick="controlService('iam', 'stop')">Stop</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 5: Lambda -->
+      <div class="service-card" id="card-lambda">
+        <div class="card-body">
+          <div class="card-top-row">
+            <div class="card-identity">
+              <div class="service-chip chip-lambda">λ</div>
+              <h3 class="service-name">Lambda</h3>
+            </div>
+            <div class="status-pill checking" id="pill-lambda">
+              <span class="status-dot"></span>
+              <span>checking</span>
+            </div>
+          </div>
+          <div class="card-meta">
+            <p class="card-desc">Serverless execution environment running sandboxed Docker container invocation loops.</p>
+            <div class="port-indicator">
+              <span>Port:</span>
+              <span class="port-value">:4569</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="/lambdaconsole" class="link-console" id="link-lambda">
+            Open Console <i class="fa-solid fa-arrow-right"></i>
+          </a>
+          <div class="card-actions">
+            <button class="btn-ctrl btn-start" id="btn-start-lambda" onclick="controlService('lambda', 'start')">Start</button>
+            <button class="btn-ctrl btn-stop" id="btn-stop-lambda" onclick="controlService('lambda', 'stop')">Stop</button>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- EC2 Card -->
-    <div class="card" id="card-ec2">
-      <div class="card-top">
-        <div class="card-top-left">
-          <div class="icon-box" style="background:#ff9900">EC2</div>
-          <h3>EC2 Compute</h3>
+    <!-- Daemon Telemetry Status Strip -->
+    <div class="system-strip">
+      <div class="system-info">
+        <div class="system-stat-item">
+          <span class="stat-k">Gateway:</span>
+          <span class="daemon-indicator"><span class="pulse-dot"></span> localhost:4566</span>
         </div>
-        <span class="status-pill status-running" id="pill-ec2">● Checking</span>
-      </div>
-      <p>Virtual compute instances and web terminal (:4567)</p>
-      <div class="card-actions">
-        <a class="btn-link" href="http://localhost:4567" target="_blank" id="link-ec2">Open Console →</a>
-        <div class="ctrl-btns">
-          <button class="btn-ctrl btn-start" onclick="controlService('ec2', 'start')" id="btn-start-ec2">Start</button>
-          <button class="btn-ctrl btn-stop" onclick="controlService('ec2', 'stop')" id="btn-stop-ec2">Stop</button>
+        <div class="system-stat-item">
+          <span class="stat-k">Active Services:</span>
+          <span class="stat-v" id="online-count">Polling...</span>
         </div>
       </div>
     </div>
-
-    <!-- IAM Card -->
-    <div class="card" id="card-iam">
-      <div class="card-top">
-        <div class="card-top-left">
-          <div class="icon-box" style="background:#a371f7; color:#fff;">IAM</div>
-          <h3>IAM Identity</h3>
-        </div>
-        <span class="status-pill status-running" id="pill-iam">● Checking</span>
-      </div>
-      <p>Users, access keys, policies & authorization (:4568)</p>
-      <div class="card-actions">
-        <a class="btn-link" href="/iamconsole" id="link-iam">Open Console →</a>
-        <div class="ctrl-btns">
-          <button class="btn-ctrl btn-start" onclick="controlService('iam', 'start')" id="btn-start-iam">Start</button>
-          <button class="btn-ctrl btn-stop" onclick="controlService('iam', 'stop')" id="btn-stop-iam">Stop</button>
-        </div>
-      </div>
+    <div style="text-align: center; margin-top: 24px; font-size: 13px; color: var(--text-muted);">
+      made by <strong style="color: var(--text-primary);">k-is-sick</strong> and <strong style="color: var(--text-primary);">joshiyashsh</strong>
     </div>
 
-    <!-- Lambda Card -->
-    <div class="card" id="card-lambda">
-      <div class="card-top">
-        <div class="card-top-left">
-          <div class="icon-box" style="background:#e5534b; color:#fff;">λ</div>
-          <h3>Lambda</h3>
-        </div>
-        <span class="status-pill status-running" id="pill-lambda">● Checking</span>
-      </div>
-      <p>Serverless event-driven compute engine (:4569)</p>
-      <div class="card-actions">
-        <a class="btn-link" href="/lambdaconsole" id="link-lambda">Open Console →</a>
-        <div class="ctrl-btns">
-          <button class="btn-ctrl btn-start" onclick="controlService('lambda', 'start')" id="btn-start-lambda">Start</button>
-          <button class="btn-ctrl btn-stop" onclick="controlService('lambda', 'stop')" id="btn-stop-lambda">Stop</button>
-        </div>
-      </div>
-    </div>
+  </main>
 
-  </div>
-</main>
-<script>
-async function logout() {
-  await fetch("/api/logout", { method: "POST", credentials: "include" });
-  window.location.href = "/";
-}
-
-async function pollStatus() {
-  try {
-    const res = await fetch("/api/services/status");
-    if (!res.ok) return;
-    const data = await res.json();
-    for (const [name, info] of Object.entries(data)) {
-      updateCardUI(name, info);
+  <script>
+    async function logout() {
+      await fetch("/api/logout", { method: "POST", credentials: "include" });
+      window.location.href = "/";
     }
-  } catch (err) {
-    console.error("Failed to fetch service status", err);
-  }
-}
 
-function updateCardUI(name, info) {
-  const pill = document.getElementById(`pill-${name}`);
-  const startBtn = document.getElementById(`btn-start-${name}`);
-  const stopBtn = document.getElementById(`btn-stop-${name}`);
-  const link = document.getElementById(`link-${name}`);
-
-  if (!pill) return;
-
-  const status = info.status; // "running", "stopped", "starting"
-  if (status === "running") {
-    pill.className = "status-pill status-running";
-    pill.textContent = "● Running";
-    if (startBtn) startBtn.disabled = true;
-    if (stopBtn) stopBtn.disabled = false;
-    if (link) {
-      link.style.pointerEvents = "auto";
-      link.style.opacity = "1";
+    async function pollStatus() {
+      try {
+        const res = await fetch("/api/services/status");
+        if (!res.ok) return;
+        const data = await res.json();
+        let runningCount = 0;
+        let totalCount = 0;
+        for (const [name, info] of Object.entries(data)) {
+          totalCount++;
+          if (info.status === "running") runningCount++;
+          updateCardUI(name, info);
+        }
+        const onlineCountEl = document.getElementById("online-count");
+        if (onlineCountEl && totalCount > 0) {
+          onlineCountEl.textContent = `${runningCount} / ${totalCount} online`;
+        }
+      } catch (err) {
+        console.error("Failed to fetch service status", err);
+      }
     }
-  } else if (status === "starting") {
-    pill.className = "status-pill status-starting";
-    pill.textContent = "● Starting...";
-    if (startBtn) startBtn.disabled = true;
-    if (stopBtn) stopBtn.disabled = true;
-  } else {
-    pill.className = "status-pill status-stopped";
-    pill.textContent = "● Stopped";
-    if (startBtn) startBtn.disabled = false;
-    if (stopBtn) stopBtn.disabled = true;
-    if (link) {
-      link.style.pointerEvents = "none";
-      link.style.opacity = "0.5";
+
+    function updateCardUI(name, info) {
+      const pill = document.getElementById(`pill-${name}`);
+      const startBtn = document.getElementById(`btn-start-${name}`);
+      const stopBtn = document.getElementById(`btn-stop-${name}`);
+      const link = document.getElementById(`link-${name}`);
+
+      if (!pill) return;
+
+      const status = info.status; // "running", "stopped", "starting"
+      if (status === "running") {
+        pill.className = "status-pill running";
+        pill.innerHTML = '<span class="status-dot"></span><span>running</span>';
+        if (startBtn) startBtn.disabled = true;
+        if (stopBtn) stopBtn.disabled = false;
+        if (link) {
+          link.style.pointerEvents = "auto";
+          link.style.opacity = "1";
+        }
+      } else if (status === "starting") {
+        pill.className = "status-pill checking";
+        pill.innerHTML = '<span class="status-dot"></span><span>starting</span>';
+        if (startBtn) startBtn.disabled = true;
+        if (stopBtn) stopBtn.disabled = true;
+      } else {
+        pill.className = "status-pill stopped";
+        pill.innerHTML = '<span class="status-dot"></span><span>stopped</span>';
+        if (startBtn) startBtn.disabled = false;
+        if (stopBtn) stopBtn.disabled = true;
+        if (link) {
+          link.style.pointerEvents = "none";
+          link.style.opacity = "0.5";
+        }
+      }
     }
-  }
-}
 
-async function controlService(name, action) {
-  const startBtn = document.getElementById(`btn-start-${name}`);
-  const stopBtn = document.getElementById(`btn-stop-${name}`);
-  if (startBtn) startBtn.disabled = true;
-  if (stopBtn) stopBtn.disabled = true;
-  
-  const pill = document.getElementById(`pill-${name}`);
-  if (pill) {
-    pill.className = "status-pill status-starting";
-    pill.textContent = action === "start" ? "● Starting..." : "● Stopping...";
-  }
+    async function controlService(name, action) {
+      const startBtn = document.getElementById(`btn-start-${name}`);
+      const stopBtn = document.getElementById(`btn-stop-${name}`);
+      if (startBtn) startBtn.disabled = true;
+      if (stopBtn) stopBtn.disabled = true;
+      
+      const pill = document.getElementById(`pill-${name}`);
+      if (pill) {
+        pill.className = "status-pill checking";
+        pill.innerHTML = `<span class="status-dot"></span><span>${action === 'start' ? 'starting' : 'stopping'}</span>`;
+      }
 
-  try {
-    const res = await fetch(`/api/services/${name}/${action}`, { method: "POST" });
-    const data = await res.json();
-    if (!res.ok) {
-      alert(data.error || `Failed to ${action} ${name}`);
+      try {
+        const res = await fetch(`/api/services/${name}/${action}`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || `Failed to ${action} ${name}`);
+        }
+      } catch (err) {
+        alert(`Error sending ${action} to ${name}`);
+      } finally {
+        setTimeout(pollStatus, 1000);
+      }
     }
-  } catch (err) {
-    alert(`Error sending ${action} to ${name}`);
-  } finally {
-    setTimeout(pollStatus, 1000);
-  }
-}
 
-pollStatus();
-setInterval(pollStatus, 3000);
-</script>
+    pollStatus();
+    setInterval(pollStatus, 3000);
+  </script>
 </body>
 </html>

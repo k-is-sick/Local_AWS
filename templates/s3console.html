@@ -2,164 +2,392 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>LocalAWS — S3 Console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S3 Storage — LocalAWS Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   :root {
-    --bg: #0e1117;
-    --panel: #161b22;
-    --border: #2a313c;
-    --text: #d6dde5;
-    --muted: #8b94a3;
-    --accent: #4da3ff;
-    --danger: #e5534b;
+    --bg-main: #0e1117;
+    --bg-surface: #161b22;
+    --bg-surface-hover: #1c2129;
+    --bg-card: #1f242d;
+    --border-default: #2e3745;
+    --border-subtle: #242b35;
+    --text-primary: #d6dde5;
+    --text-muted: #8b94a3;
+    --accent-orange: #ff9900;
+    --status-green: #3fb950;
+    --status-red: #f85149;
+    --font-sans: 'IBM Plex Sans', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    margin: 0;
-    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
-  header {
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--border);
+  a { color: inherit; text-decoration: none; }
+
+  /* TOP HEADER */
+  .top-header {
+    height: 48px;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .brand-group { display: flex; align-items: center; gap: 12px; }
+  .brand-logo {
+    width: 24px;
+    height: 24px;
+    background: var(--status-green);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 12px;
+    color: #0e1117;
+  }
+  .brand-wordmark {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-left: 12px;
+    padding-left: 12px;
+    border-left: 1px solid var(--border-subtle);
+  }
+  .nav-breadcrumb a { color: var(--accent-orange); cursor: pointer; }
+  .nav-breadcrumb a:hover { text-decoration: underline; }
+  .nav-breadcrumb .current { color: #ffffff; font-weight: 500; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-primary);
+    padding: 4px 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+  }
+  .btn-signout {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border-default);
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-signout:hover {
+    color: #ffffff;
+    border-color: var(--accent-orange);
+    background: var(--bg-surface-hover);
+  }
+
+  /* MAIN CONTENT */
+  .main-content {
+    flex: 1;
+    max-width: 1440px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px 32px 48px;
+  }
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
     display: flex;
     align-items: center;
     gap: 10px;
   }
-  header .logo {
-    width: 28px; height: 28px;
-    background: var(--accent);
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; color: #0e1117; font-size: 14px;
-  }
-  header h1 { font-size: 16px; font-weight: 600; margin: 0; }
-  header .endpoint { color: var(--muted); font-size: 12px; margin-left: auto; }
-
-  main { padding: 24px; max-width: 960px; margin: 0 auto; }
-
-  .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
-  .breadcrumb span.current { color: var(--text); }
-  .breadcrumb a { color: var(--accent); cursor: pointer; text-decoration: none; }
-
-  .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-  button {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  button:hover { border-color: var(--accent); }
-  button.primary { background: var(--accent); border-color: var(--accent); color: #0e1117; font-weight: 600; }
-  button.danger { color: var(--danger); }
-  button.danger:hover { border-color: var(--danger); }
-  input[type=text] {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 13px;
-  }
-
-  table { width: 100%; border-collapse: collapse; }
-  th {
-    text-align: left;
+  .page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  
+  .s3-chip {
+    font-family: var(--font-mono);
     font-size: 11px;
+    font-weight: 600;
+    color: var(--status-green);
+    background: rgba(63, 185, 80, 0.12);
+    border: 1px solid rgba(63, 185, 80, 0.3);
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+
+  /* TOOLBAR & INPUTS */
+  .table-toolbar {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  input[type=text] {
+    background-color: var(--bg-main);
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    padding: 7px 12px;
+    outline: none;
+    min-width: 220px;
+    transition: border-color 0.15s ease;
+  }
+  input[type=text]:focus {
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 0 1px var(--accent-orange);
+  }
+  button {
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid var(--border-default);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  button:hover {
+    background: var(--bg-surface-hover);
+    border-color: var(--text-muted);
+  }
+  button.primary {
+    background-color: var(--accent-orange);
+    border-color: var(--accent-orange);
+    color: #0e1117;
+    font-weight: 600;
+  }
+  button.primary:hover {
+    background-color: #ffaa22;
+    border-color: #ffaa22;
+  }
+  button.danger {
+    color: var(--status-red);
+    border-color: rgba(248, 81, 73, 0.4);
+    background: transparent;
+  }
+  button.danger:hover {
+    background: rgba(248, 81, 73, 0.12);
+    border-color: var(--status-red);
+  }
+
+  /* DATA TABLE */
+  .data-table-wrap {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 0 0 6px 6px;
+    overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th {
+    background-color: #12161d;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 11.5px;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--muted);
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.5px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-default);
   }
   td {
-    padding: 10px;
-    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-subtle);
     font-size: 13px;
+    color: var(--text-primary);
   }
-  tr.row:hover { background: var(--panel); }
+  tr.row:hover td { background-color: var(--bg-surface-hover); }
   tr.row { cursor: pointer; }
-  .name-cell { display: flex; align-items: center; gap: 8px; }
-  .icon { color: var(--accent); font-size: 14px; }
+  .name-cell { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); }
+  .name-cell .icon { color: var(--accent-orange); font-size: 14px; }
   .actions-cell { text-align: right; white-space: nowrap; }
-  .actions-cell button { padding: 5px 10px; font-size: 12px; margin-left: 4px; }
+  .actions-cell button { padding: 4px 10px; font-size: 12px; margin-left: 4px; }
 
-  .empty { color: var(--muted); padding: 40px; text-align: center; font-size: 13px; }
-  .status { font-size: 12px; color: var(--muted); margin-top: 12px; min-height: 16px; }
-  .status.error { color: var(--danger); }
-  .status.ok { color: #3fb950; }
+  .empty {
+    color: var(--text-muted);
+    padding: 48px;
+    text-align: center;
+    font-size: 13px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 0 0 6px 6px;
+  }
+  .status {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin-top: 14px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    min-height: 16px;
+  }
+  .status.error {
+    color: var(--status-red);
+    background: rgba(248, 81, 73, 0.1);
+    border: 1px solid rgba(248, 81, 73, 0.25);
+  }
+  .status.ok {
+    color: var(--status-green);
+    background: rgba(63, 185, 80, 0.1);
+    border: 1px solid rgba(63, 185, 80, 0.25);
+  }
 
+  /* MODAL PREVIEW OVERLAY */
   .overlay {
     display: none;
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6);
+    background: rgba(6, 9, 13, 0.8);
+    backdrop-filter: blur(2px);
     align-items: center; justify-content: center;
-    z-index: 50;
+    z-index: 100;
   }
   .overlay.open { display: flex; }
   .modal {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    width: 640px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    width: 680px;
     max-width: 90vw;
-    max-height: 80vh;
+    max-height: 85vh;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.6);
   }
   .modal-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-default);
+    background: var(--bg-card);
   }
-  .modal-header h2 { font-size: 14px; margin: 0; word-break: break-all; }
-  .modal-header button { padding: 4px 9px; }
+  .modal-header h2 { font-size: 15px; font-weight: 600; color: #fff; font-family: var(--font-mono); word-break: break-all; }
+  .modal-header button { padding: 4px 10px; }
   .modal-body {
-    padding: 16px;
+    padding: 20px;
     overflow: auto;
     font-size: 13px;
   }
-  .modal-body img { max-width: 100%; border-radius: 4px; display: block; }
+  .modal-body img { max-width: 100%; border-radius: 4px; display: block; margin: 0 auto; border: 1px solid var(--border-default); }
   .modal-body pre {
     white-space: pre-wrap;
     word-break: break-word;
     margin: 0;
-    color: var(--text);
-    font-family: "SFMono-Regular", Consolas, monospace;
-    font-size: 12.5px;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--bg-main);
+    padding: 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border-subtle);
   }
-  .meta-row { display: flex; gap: 16px; margin-bottom: 12px; color: var(--muted); font-size: 12px; }
+  .meta-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: rgba(255,153,0,0.06);
+    border: 1px solid rgba(255,153,0,0.15);
+    padding: 8px 12px;
+    border-radius: 4px;
+  }
   .modal-footer {
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    display: flex; justify-content: flex-end; gap: 8px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border-default);
+    display: flex; justify-content: flex-end; gap: 10px;
+    background: var(--bg-card);
   }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">S3</div>
-  <h1>LocalAWS Console — S3</h1>
-  <a href="/services" style="color:var(--muted);text-decoration:none;font-size:13px;margin-left:16px;">← Services</a>
-  <div class="userinfo" style="margin-left:auto; display:flex; align-items:center; gap:14px; font-size:13px; color:var(--muted);">
-    <div class="user-badge" id="userEmailBadge" style="background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text); font-size:12px;">Loading...</div>
-    <button onclick="logout()">Sign out</button>
+<header class="top-header">
+  <div class="brand-group">
+    <a href="/services" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
+      <img src="/static/images/Local_AWS_logo.png" alt="LocalAWS Logo" style="height:44px; width:auto; display:block; object-fit:contain;">
+      <div class="brand-wordmark">
+        LocalAWS Console
+      </div>
+    </a>
+    <div class="nav-breadcrumb" id="breadcrumb"></div>
+  </div>
+  <div class="header-right">
+    <a href="/services" style="color:var(--text-muted); font-size:12px;"><i class="fa-solid fa-arrow-left"></i> Services</a>
+    <div class="user-badge" id="userEmailBadge">Loading...</div>
+    <button class="btn-signout" onclick="logout()">Sign out</button>
   </div>
 </header>
 
-<main>
-  <div class="breadcrumb" id="breadcrumb"></div>
-  <div class="toolbar" id="toolbar"></div>
-  <table>
-    <thead><tr id="tableHead"></tr></thead>
-    <tbody id="tableBody"></tbody>
-  </table>
-  <div id="emptyState" class="empty" style="display:none;"></div>
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">
+        <i class="fa-solid fa-database" style="color:var(--status-green);"></i>
+        Simple Storage Service (S3)
+        <span class="s3-chip">s3.local</span>
+      </div>
+      <div class="page-subtitle">Manage S3 buckets, object keys, and file contents.</div>
+    </div>
+  </div>
+
+  <div class="table-toolbar">
+    <div class="toolbar" id="toolbar"></div>
+  </div>
+
+  <div class="data-table-wrap">
+    <table>
+      <thead><tr id="tableHead"></tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="emptyState" class="empty" style="display:none;"></div>
+  </div>
+
   <div class="status" id="status"></div>
 </main>
 
@@ -167,11 +395,11 @@
   <div class="modal">
     <div class="modal-header">
       <h2 id="modalTitle"></h2>
-      <button onclick="closeModal()">✕</button>
+      <button onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body" id="modalBody">Loading...</div>
     <div class="modal-footer">
-      <button id="modalDownloadBtn">Download</button>
+      <button class="primary" id="modalDownloadBtn"><i class="fa-solid fa-download"></i> Download</button>
       <button onclick="closeModal()">Close</button>
     </div>
   </div>
@@ -201,7 +429,7 @@ function renderBreadcrumb() {
   if (currentBucket === null) {
     el.innerHTML = `<span class="current">Buckets</span>`;
   } else {
-    el.innerHTML = `<a onclick="goToBuckets()">Buckets</a> / <span class="current">${currentBucket}</span>`;
+    el.innerHTML = `<a onclick="goToBuckets()"><i class="fa-solid fa-bucket"></i> Buckets</a> / <span class="current">${currentBucket}</span>`;
   }
 }
 
@@ -210,15 +438,15 @@ function renderToolbar() {
   if (currentBucket === null) {
     el.innerHTML = `
       <input type="text" id="newBucketName" placeholder="bucket-name">
-      <button class="primary" onclick="createBucket()">Create bucket</button>
-      <button onclick="loadBuckets()">Refresh</button>
+      <button class="primary" onclick="createBucket()"><i class="fa-solid fa-plus"></i> Create bucket</button>
+      <button onclick="loadBuckets()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
     `;
   } else {
     el.innerHTML = `
       <input type="file" id="fileInput" style="display:none" onchange="uploadFile()">
-      <button class="primary" onclick="document.getElementById('fileInput').click()">Upload file</button>
-      <button onclick="loadObjects()">Refresh</button>
-      <button class="danger" onclick="deleteBucket()">Delete bucket</button>
+      <button class="primary" onclick="document.getElementById('fileInput').click()"><i class="fa-solid fa-upload"></i> Upload file</button>
+      <button onclick="loadObjects()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+      <button class="danger" onclick="deleteBucket()"><i class="fa-solid fa-trash"></i> Delete bucket</button>
     `;
   }
 }
@@ -250,9 +478,9 @@ async function loadBuckets() {
       const tr = document.createElement("tr");
       tr.className = "row";
       tr.innerHTML = `
-        <td onclick="openBucket('${b}')"><div class="name-cell"><span class="icon">▤</span>${b}</div></td>
+        <td onclick="openBucket('${b}')"><div class="name-cell"><span class="icon"><i class="fa-solid fa-bucket"></i></span>${b}</div></td>
         <td class="actions-cell">
-          <button onclick="event.stopPropagation(); deleteBucketByName('${b}')" class="danger">Delete</button>
+          <button onclick="event.stopPropagation(); deleteBucketByName('${b}')" class="danger"><i class="fa-solid fa-trash"></i> Delete</button>
         </td>`;
       body.appendChild(tr);
     });
@@ -318,10 +546,10 @@ async function loadObjects() {
     data.objects.forEach(key => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><div class="name-cell" ondblclick="inspectObject('${key}')" title="Double-click to inspect"><span class="icon">⬚</span>${key}</div></td>
+        <td><div class="name-cell" ondblclick="inspectObject('${key}')" title="Double-click to inspect"><span class="icon"><i class="fa-solid fa-file"></i></span>${key}</div></td>
         <td class="actions-cell">
-          <button onclick="downloadFile('${key}')">Download</button>
-          <button class="danger" onclick="deleteObject('${key}')">Delete</button>
+          <button onclick="downloadFile('${key}')"><i class="fa-solid fa-download"></i> Download</button>
+          <button class="danger" onclick="deleteObject('${key}')"><i class="fa-solid fa-trash"></i> Delete</button>
         </td>`;
       body.appendChild(tr);
     });
@@ -396,10 +624,10 @@ async function inspectObject(key) {
       const escaped = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
       body.innerHTML = meta + `<pre>${escaped.slice(0, 20000)}</pre>`;
     } else {
-      body.innerHTML = meta + `<div style="color:var(--muted)">No inline preview for this file type. Use Download to view it.</div>`;
+      body.innerHTML = meta + `<div style="color:var(--text-muted)">No inline preview for this file type. Use Download to view it.</div>`;
     }
   } catch (e) {
-    body.innerHTML = `<div style="color:var(--danger)">Could not load object: ${e.message}</div>`;
+    body.innerHTML = `<div style="color:var(--status-red)">Could not load object: ${e.message}</div>`;
   }
 }
 

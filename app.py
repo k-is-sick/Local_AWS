@@ -52,7 +52,7 @@ def init_db():
             time.sleep(2)
 
 
-_VERSION = "1.0.0"
+_VERSION = "1.10.0"
 
 SERVICE_CONFIG = {
     "s3": {
@@ -378,6 +378,16 @@ def api_me():
         return jsonify({"email": session["user_email"]})
     return jsonify({"email": None}), 401
 
+
+from flask import send_from_directory
+
+@app.route("/docs/images/<path:filename>")
+def serve_docs_images(filename):
+    return send_from_directory(os.path.join(app.root_path, "docs", "images"), filename)
+
+@app.route("/static/images/<path:filename>")
+def serve_static_images(filename):
+    return send_from_directory(os.path.join(app.root_path, "static", "images"), filename)
 
 @app.route("/favicon.ico")
 def favicon():

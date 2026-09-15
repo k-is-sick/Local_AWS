@@ -8,6 +8,7 @@ import urllib.request
 import webbrowser
 import tkinter as tk
 from tkinter import messagebox
+from PIL import Image, ImageTk
 
 RUN_DIR_NAME = "LocalAWS_Runtime"
 DOCKER_DOWNLOAD_URL = "https://www.docker.com/products/docker-desktop/"
@@ -37,6 +38,7 @@ def sync_resources(src_dir, dst_dir):
         "iam",
         "lambda",
         "templates",
+        "static",
         "shared"
     ]
     for item in items_to_copy:
@@ -96,18 +98,35 @@ def run_docker_down(cwd):
 class LocalAWSLauncherApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("LocalAWS Control Launcher")
-        self.root.geometry("520x360")
+        self.root.title("LocalAWS Console Launcher")
+        self.root.geometry("560x410")
         self.root.resizable(False, False)
-        self.root.configure(bg="#0d1117")
+        self.root.configure(bg="#0e1117")
 
         self.runtime_dir = get_runtime_dir()
         self.is_running = False
+        self.src_dir = get_resource_dir()
 
+        self.set_window_icon()
         self.setup_ui()
         
         # Start initialization thread
         threading.Thread(target=self.initial_startup, daemon=True).start()
+
+    def set_window_icon(self):
+        # Set taskbar / window icon
+        ico_path = os.path.join(self.src_dir, "launcher", "logo.ico")
+        png_path = os.path.join(self.src_dir, "static", "images", "Local_AWS_logo.png")
+        
+        try:
+            if sys.platform == "win32" and os.path.exists(ico_path):
+                self.root.iconbitmap(ico_path)
+            elif os.path.exists(png_path):
+                img = Image.open(png_path)
+                self.window_icon_img = ImageTk.PhotoImage(img)
+                self.root.iconphoto(True, self.window_icon_img)
+        except Exception:
+            pass
 
     def create_hover_button(self, parent, text, bg, fg, hover_bg, command, is_bold=False):
         font_style = ("Segoe UI", 9, "bold") if is_bold else ("Segoe UI", 9)
@@ -123,8 +142,8 @@ class LocalAWSLauncherApp:
             bd=0,
             cursor="hand2",
             command=command,
-            padx=14,
-            pady=7
+            padx=16,
+            pady=8
         )
         
         def on_enter(e):
@@ -142,71 +161,106 @@ class LocalAWSLauncherApp:
         return btn
 
     def setup_ui(self):
-        # Header Box
-        header_frame = tk.Frame(self.root, bg="#161b22", padx=24, pady=16)
+        # Global Header Bar
+        header_frame = tk.Frame(self.root, bg="#161b22", padx=24, pady=14, highlightbackground="#2e3745", highlightthickness=1)
         header_frame.pack(fill="x", side="top")
 
         header_content = tk.Frame(header_frame, bg="#161b22")
         header_content.pack(fill="x")
 
-        # Logo Badge
-        logo_lbl = tk.Label(
-            header_content,
-            text="L",
-            font=("Segoe UI", 12, "bold"),
-            fg="#161616",
-            bg="#ff9900",
-            width=2,
-            height=1
-        )
-        logo_lbl.pack(side="left", padx=(0, 12))
+        # Logo Image
+        logo_png_path = os.path.join(self.src_dir, "static", "images", "Local_AWS_logo.png")
+        logo_loaded = False
+        if os.path.exists(logo_png_path):
+            try:
+                img = Image.open(logo_png_path)
+                w, h = img.size
+                target_h = 34
+                target_w = int(w * (target_h / h))
+                img_resized = img.resize((target_w, target_h), Image.Resampling.LANCZOS)
+                self.header_logo_img = ImageTk.PhotoImage(img_resized)
+                logo_lbl = tk.Label(header_content, image=self.header_logo_img, bg="#161b22")
+                logo_lbl.pack(side="left", padx=(0, 12))
+                logo_loaded = True
+            except Exception:
+                pass
+
+        if not logo_loaded:
+            # Fallback orange box logo
+            logo_lbl = tk.Label(
+                header_content,
+                text="L",
+                font=("IBM Plex Mono", 12, "bold"),
+                fg="#0e1117",
+                bg="#ff9900",
+                width=2,
+                height=1
+            )
+            logo_lbl.pack(side="left", padx=(0, 12))
 
         header_text = tk.Frame(header_content, bg="#161b22")
         header_text.pack(side="left", fill="x")
 
+        # Title Row (LocalAWS Console + v1.0 Badge)
+        title_row = tk.Frame(header_text, bg="#161b22")
+        title_row.pack(anchor="w")
+
         title_lbl = tk.Label(
-            header_text,
-            text="LocalAWS Control Launcher",
-            font=("Segoe UI", 13, "bold"),
-            fg="#e6edf3",
+            title_row,
+            text="LocalAWS Console Launcher",
+            font=("Segoe UI", 12, "bold"),
+            fg="#ffffff",
             bg="#161b22"
         )
-        title_lbl.pack(anchor="w")
+        title_lbl.pack(side="left", padx=(0, 8))
+
+        badge_lbl = tk.Label(
+            title_row,
+            text="v1.10",
+            font=("Consolas", 8, "bold"),
+            fg="#ff9900",
+            bg="#161b22",
+            highlightbackground="#ff9900",
+            highlightthickness=1,
+            padx=4,
+            pady=1
+        )
+        badge_lbl.pack(side="left")
 
         sub_lbl = tk.Label(
             header_text,
-            text="Local AWS Micro-Cloud Emulation Suite",
+            text="Local Cloud Infrastructure & Services Suite",
             font=("Segoe UI", 9),
-            fg="#8b949e",
+            fg="#8b94a3",
             bg="#161b22"
         )
         sub_lbl.pack(anchor="w", pady=(2, 0))
 
         # Main Body Container
-        main_container = tk.Frame(self.root, bg="#0d1117", padx=24, pady=20)
+        main_container = tk.Frame(self.root, bg="#0e1117", padx=24, pady=18)
         main_container.pack(fill="both", expand=True)
 
-        # Status Card (Bordered Box)
+        # Status Card (Bordered Box matching web surface)
         self.card_frame = tk.Frame(
             main_container,
-            bg="#161b22",
-            highlightbackground="#30363d",
+            bg="#1f242d",
+            highlightbackground="#2e3745",
             highlightthickness=1,
             padx=18,
             pady=16
         )
-        self.card_frame.pack(fill="x", pady=(0, 20))
+        self.card_frame.pack(fill="x", pady=(0, 16))
 
-        # Status Row (Badge Dot + Text)
-        status_row = tk.Frame(self.card_frame, bg="#161b22")
-        status_row.pack(anchor="w", fill="x", pady=(0, 10))
+        # Status Row (Dot + Text Status)
+        status_row = tk.Frame(self.card_frame, bg="#1f242d")
+        status_row.pack(anchor="w", fill="x", pady=(0, 12))
 
         self.status_dot = tk.Label(
             status_row,
             text="●",
             font=("Segoe UI", 14),
             fg="#d29922",
-            bg="#161b22"
+            bg="#1f242d"
         )
         self.status_dot.pack(side="left", padx=(0, 8))
 
@@ -215,62 +269,96 @@ class LocalAWSLauncherApp:
             text="Checking Docker Desktop...",
             font=("Segoe UI", 11, "bold"),
             fg="#d29922",
-            bg="#161b22"
+            bg="#1f242d"
         )
         self.status_lbl.pack(side="left")
+
+        # Daemon Badge Indicator
+        daemon_lbl = tk.Label(
+            status_row,
+            text="Gateway: http://localhost:4566",
+            font=("Consolas", 8),
+            fg="#ff9900",
+            bg="#161b22",
+            highlightbackground="#2e3745",
+            highlightthickness=1,
+            padx=6,
+            pady=2
+        )
+        daemon_lbl.pack(side="right")
 
         # Runtime Info Sub-section
         path_header = tk.Label(
             self.card_frame,
             text="RUNTIME DIRECTORY",
             font=("Segoe UI", 8, "bold"),
-            fg="#8b949e",
-            bg="#161b22"
+            fg="#8b94a3",
+            bg="#1f242d"
         )
-        path_header.pack(anchor="w", pady=(0, 2))
+        path_header.pack(anchor="w", pady=(0, 4))
+
+        info_box = tk.Frame(
+            self.card_frame,
+            bg="#0e1117",
+            highlightbackground="#242b35",
+            highlightthickness=1,
+            padx=10,
+            pady=6
+        )
+        info_box.pack(fill="x")
 
         self.info_lbl = tk.Label(
-            self.card_frame,
+            info_box,
             text=self.runtime_dir,
             font=("Consolas", 8),
-            fg="#8b949e",
-            bg="#161b22",
+            fg="#d6dde5",
+            bg="#0e1117",
             justify="left",
-            wraplength=430
+            wraplength=460
         )
         self.info_lbl.pack(anchor="w")
 
         # Action Buttons Row
-        btn_frame = tk.Frame(main_container, bg="#0d1117")
-        btn_frame.pack(fill="x")
+        btn_frame = tk.Frame(main_container, bg="#0e1117")
+        btn_frame.pack(fill="x", pady=(4, 16))
 
+        # Primary Orange Button for Open Console
         self.btn_open = self.create_hover_button(
-            btn_frame, "Open Console", "#238636", "#ffffff", "#2ea043", self.open_browser, is_bold=True
+            btn_frame, "Open Console", "#ff9900", "#0e1117", "#ffaa22", self.open_browser, is_bold=True
         )
         self.btn_open.pack(side="left", padx=(0, 10))
         self.btn_open.config(state="disabled")
 
         self.btn_start = self.create_hover_button(
-            btn_frame, "Start Stack", "#21262d", "#c9d1d9", "#30363d", self.start_stack_thread
+            btn_frame, "Start Stack", "#21262d", "#3fb950", "#2ea043", self.start_stack_thread
         )
         self.btn_start.pack(side="left", padx=(0, 10))
         self.btn_start.config(state="disabled")
 
         self.btn_stop = self.create_hover_button(
-            btn_frame, "Stop Stack", "#da3633", "#ffffff", "#f85149", self.stop_stack_thread
+            btn_frame, "Stop Stack", "#21262d", "#f85149", "#da3633", self.stop_stack_thread
         )
         self.btn_stop.pack(side="left", padx=(0, 10))
         self.btn_stop.config(state="disabled")
 
         self.btn_quit = self.create_hover_button(
-            btn_frame, "Exit", "#21262d", "#c9d1d9", "#30363d", self.on_quit
+            btn_frame, "Exit", "#21262d", "#8b94a3", "#30363d", self.on_quit
         )
         self.btn_quit.pack(side="right")
+
+        # Footer Credit Line
+        footer_lbl = tk.Label(
+            main_container,
+            text="made by k-is-sick and joshiyashsh",
+            font=("Segoe UI", 9),
+            fg="#8b94a3",
+            bg="#0e1117"
+        )
+        footer_lbl.pack(side="bottom")
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_quit)
 
     def set_status(self, text, color, open_enabled=False, start_enabled=False, stop_enabled=False):
-        # Format display text (strip 'Status: ' prefix if present)
         display_text = text.replace("Status: ", "")
         self.status_lbl.config(text=display_text, fg=color)
         self.status_dot.config(fg=color)
@@ -279,25 +367,29 @@ class LocalAWSLauncherApp:
         self.btn_start.config(state="normal" if start_enabled else "disabled")
         self.btn_stop.config(state="normal" if stop_enabled else "disabled")
 
-        # Adjust background colors when disabled/enabled
-        for btn in (self.btn_open, self.btn_start, self.btn_stop):
-            if btn["state"] == "disabled":
-                btn.config(bg="#161b22", fg="#484f58")
-            else:
-                btn.config(bg=btn.default_bg, fg="#ffffff" if btn.default_bg in ("#238636", "#da3633") else "#c9d1d9")
+        # Button styling according to enabled state
+        if self.btn_open["state"] == "disabled":
+            self.btn_open.config(bg="#161b22", fg="#484f58")
+        else:
+            self.btn_open.config(bg="#ff9900", fg="#0e1117")
+
+        if self.btn_start["state"] == "disabled":
+            self.btn_start.config(bg="#161b22", fg="#484f58")
+        else:
+            self.btn_start.config(bg="#21262d", fg="#3fb950")
+
+        if self.btn_stop["state"] == "disabled":
+            self.btn_stop.config(bg="#161b22", fg="#484f58")
+        else:
+            self.btn_stop.config(bg="#21262d", fg="#f85149")
 
     def initial_startup(self):
-        # 1. Check Docker
         if not check_docker():
             self.root.after(0, self.handle_no_docker)
             return
 
-        # 2. Extract/sync runtime files
         self.set_status("Status: Syncing runtime resources...", "#d29922")
-        src_dir = get_resource_dir()
-        sync_resources(src_dir, self.runtime_dir)
-
-        # 3. Start docker compose stack
+        sync_resources(self.src_dir, self.runtime_dir)
         self.start_stack_internal()
 
     def handle_no_docker(self):
@@ -319,7 +411,6 @@ class LocalAWSLauncherApp:
         self.set_status("Status: Starting Docker containers...", "#d29922")
         run_docker_up(self.runtime_dir)
 
-        # Poll gateway health
         self.set_status("Status: Waiting for LocalAWS Gateway (:4566)...", "#d29922")
         healthy = False
         for _ in range(45):

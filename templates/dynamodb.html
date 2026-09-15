@@ -3,267 +3,328 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LocalAWS Console — DynamoDB</title>
+<title>DynamoDB Console — LocalAWS Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   :root {
-    --bg: #0e1117;
-    --panel: #161b22;
-    --panel-hover: #1f242c;
-    --border: #2a313c;
-    --text: #d6dde5;
-    --muted: #8b94a3;
-    --accent: #4da3ff;
+    --bg-main: #0e1117;
+    --bg-surface: #161b22;
+    --bg-surface-hover: #1c2129;
+    --bg-card: #1f242d;
+    --border-default: #2e3745;
+    --border-subtle: #242b35;
+    --text-primary: #d6dde5;
+    --text-muted: #8b94a3;
     --accent-orange: #ff9900;
-    --danger: #e5534b;
-    --ok: #3fb950;
+    --status-green: #3fb950;
+    --status-blue: #58a6ff;
+    --status-red: #f85149;
+    --font-sans: 'IBM Plex Sans', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
   }
-  * { box-sizing: border-box; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.5;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
-  header {
-    padding: 14px 28px;
-    border-bottom: 1px solid var(--border);
+  a { color: inherit; text-decoration: none; }
+
+  /* TOP HEADER */
+  .top-header {
+    height: 48px;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-default);
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: var(--panel);
+    justify-content: space-between;
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
   }
-  .logo {
-    width: 32px;
-    height: 32px;
-    background: var(--accent);
-    border-radius: 6px;
+  .brand-group { display: flex; align-items: center; gap: 12px; }
+  .brand-logo {
+    width: 24px;
+    height: 24px;
+    background: var(--status-blue);
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    color: #fff;
-    font-size: 13px;
-    letter-spacing: -0.5px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 12px;
+    color: #0e1117;
   }
-  header h1 {
-    font-size: 16px;
+  .brand-wordmark {
+    font-size: 14px;
     font-weight: 600;
-    margin: 0;
-    letter-spacing: -0.2px;
-  }
-  .nav-back {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13px;
-    margin-left: 12px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.15s;
-  }
-  .nav-back:hover {
-    color: var(--text);
-    background: rgba(255, 255, 255, 0.05);
-  }
-  .userinfo {
-    margin-left: auto;
+    color: #fff;
     display: flex;
     align-items: center;
-    gap: 14px;
-    font-size: 13px;
-    color: var(--muted);
+    gap: 8px;
   }
+  .header-right { display: flex; align-items: center; gap: 12px; }
   .user-badge {
-    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-primary);
     padding: 4px 10px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-size: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
   }
-  .userinfo button {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 6px 14px;
-    border-radius: 6px;
+  .btn-signout {
+    font-family: var(--font-sans);
     font-size: 12px;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border-default);
+    padding: 4px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.15s ease;
   }
-  .userinfo button:hover {
-    border-color: var(--accent);
-    color: #fff;
+  .btn-signout:hover {
+    color: #ffffff;
+    border-color: var(--accent-orange);
+    background: var(--bg-surface-hover);
   }
 
+  /* PAGE HEADER */
+  .page-header {
+    padding: 20px 32px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .page-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .count-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* MAIN LAYOUT */
   main {
-    max-width: 1200px;
-    margin: 28px auto;
-    padding: 0 24px;
+    flex: 1;
+    max-width: 1440px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px 32px;
     display: grid;
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 320px 1fr;
     gap: 24px;
   }
-  @media (max-width: 860px) {
+  @media (max-width: 900px) {
     main { grid-template-columns: 1fr; }
   }
 
-  .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px;
+  .panel-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
-  .panel h2 {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--muted);
-    margin: 0 0 14px;
+  .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-subtle);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: var(--bg-card);
   }
+  .panel-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-body {
+    padding: 16px;
+  }
+
   label {
     font-size: 12px;
-    color: var(--muted);
+    color: var(--text-muted);
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
     font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
   input, textarea {
     width: 100%;
-    padding: 9px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
     font-size: 13px;
-    margin-bottom: 12px;
-    transition: border-color 0.15s;
+    margin-bottom: 14px;
+    transition: border-color 0.15s ease;
   }
   input:focus, textarea:focus {
     outline: none;
-    border-color: var(--accent);
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 0 1px var(--accent-orange);
   }
   textarea {
-    height: 110px;
+    height: 130px;
     resize: vertical;
-    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-    font-size: 12.5px;
-    line-height: 1.4;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.5;
   }
+
   button {
-    padding: 8px 14px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    color: var(--text);
-    background: var(--panel);
-    font-size: 13px;
+    font-family: var(--font-sans);
+    font-size: 12.5px;
     font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+    background: var(--bg-surface);
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
-  button:hover { border-color: var(--accent); }
+  button:hover {
+    background: var(--bg-surface-hover);
+    border-color: var(--text-muted);
+  }
   button.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
+    background: var(--accent-orange);
+    border-color: var(--accent-orange);
+    color: #0e1117;
     font-weight: 600;
   }
-  button.primary:hover { opacity: 0.92; }
-  button.danger { color: var(--danger); }
-  button.danger:hover { border-color: var(--danger); background: rgba(229, 83, 75, 0.1); }
-  .btn-full { width: 100%; }
+  button.primary:hover { background: #ffaa22; border-color: #ffaa22; }
+  button.danger {
+    color: var(--status-red);
+    border-color: rgba(248, 81, 73, 0.4);
+    background: transparent;
+  }
+  button.danger:hover {
+    background: rgba(248, 81, 73, 0.12);
+    border-color: var(--status-red);
+  }
+  .btn-full { width: 100%; justify-content: center; }
 
   .table-list {
-    margin-top: 8px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
   }
   .table-item {
-    padding: 10px 12px;
-    border-radius: 6px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-subtle);
     cursor: pointer;
     font-size: 13px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid transparent;
-    transition: all 0.15s;
+    transition: background 0.15s ease;
   }
-  .table-item:hover {
-    background: var(--panel-hover);
-    border-color: var(--border);
-  }
+  .table-item:hover { background: var(--bg-surface-hover); }
   .table-item.active {
-    background: rgba(77, 163, 255, 0.12);
-    border-color: rgba(77, 163, 255, 0.4);
-    color: #fff;
+    background: var(--bg-surface-hover);
+    border-left: 3px solid var(--accent-orange);
     font-weight: 600;
   }
   .table-item .del {
-    color: var(--danger);
-    font-size: 12px;
+    color: var(--status-red);
+    font-size: 13px;
     padding: 2px 6px;
     border-radius: 4px;
     opacity: 0;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s ease;
   }
   .table-item:hover .del { opacity: 1; }
-  .table-item .del:hover { background: rgba(229, 83, 75, 0.15); }
+  .table-item .del:hover { background: rgba(248, 81, 73, 0.15); }
 
   .right-panel .table-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 16px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-default);
+    background: var(--bg-card);
   }
   .right-panel h2.table-title {
     font-size: 18px;
-    font-weight: 700;
-    margin: 0 0 6px;
-    color: var(--text);
-    text-transform: none;
-    letter-spacing: normal;
+    font-weight: 600;
+    color: #ffffff;
+    font-family: var(--font-mono);
   }
   .meta-chips {
     display: flex;
     gap: 8px;
+    margin-top: 8px;
     flex-wrap: wrap;
   }
   .chip {
-    font-size: 12px;
-    background: var(--bg);
-    border: 1px solid var(--border);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    background: var(--bg-main);
+    border: 1px solid var(--border-subtle);
     padding: 3px 8px;
     border-radius: 4px;
-    color: var(--muted);
+    color: var(--text-muted);
   }
-  .chip strong { color: var(--text); }
+  .chip strong { color: var(--accent-orange); }
 
   .toolbar {
+    padding: 12px 20px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
     display: flex;
     gap: 10px;
-    margin-bottom: 16px;
     flex-wrap: wrap;
     align-items: center;
   }
   .toolbar input {
     margin: 0;
-    width: auto;
     flex: 1;
-    min-width: 180px;
+    min-width: 200px;
   }
-  .toolbar button { margin: 0; }
 
   .table-wrap {
     overflow-x: auto;
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    background: var(--bg-surface);
   }
   table {
     width: 100%;
@@ -272,133 +333,168 @@
   }
   th {
     text-align: left;
-    font-size: 11px;
+    font-size: 11.5px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .05em;
-    color: var(--muted);
-    padding: 10px 12px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 10px 16px;
+    background: #12161d;
+    border-bottom: 1px solid var(--border-default);
   }
   td {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
-    max-width: 250px;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    max-width: 280px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--panel-hover); }
+  tr:hover td { background: var(--bg-surface-hover); }
 
   .empty {
-    color: var(--muted);
+    color: var(--text-muted);
     text-align: center;
-    padding: 40px 20px;
+    padding: 48px 20px;
     font-size: 13px;
   }
   .status {
+    font-family: var(--font-mono);
     font-size: 12px;
-    min-height: 18px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    min-height: 16px;
     margin-top: 10px;
   }
-  .status.ok { color: var(--ok); }
-  .status.error { color: var(--danger); }
+  .status.ok {
+    color: var(--status-green);
+    background: rgba(63, 185, 80, 0.1);
+    border: 1px solid rgba(63, 185, 80, 0.25);
+  }
+  .status.error {
+    color: var(--status-red);
+    background: rgba(248, 81, 73, 0.1);
+    border: 1px solid rgba(248, 81, 73, 0.25);
+  }
 
+  /* MODAL */
   .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.65);
+    background: rgba(6, 9, 13, 0.8);
     backdrop-filter: blur(2px);
     align-items: center;
     justify-content: center;
-    z-index: 50;
+    z-index: 100;
   }
   .modal-overlay.open { display: flex; }
   .modal {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    width: 520px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    width: 540px;
     max-width: 90vw;
     padding: 24px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.6);
   }
   .modal h3 {
-    margin: 0 0 14px;
+    margin: 0 0 16px;
     font-size: 16px;
     font-weight: 600;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
   .modal-footer {
     display: flex;
     gap: 10px;
     justify-content: flex-end;
-    margin-top: 16px;
+    margin-top: 20px;
   }
   .json-hint {
     font-size: 11px;
-    color: var(--muted);
-    margin-top: -8px;
-    margin-bottom: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    margin-top: -6px;
+    margin-bottom: 12px;
   }
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">DB</div>
-  <h1>LocalAWS Console — DynamoDB</h1>
-  <a class="nav-back" href="/services">← Services</a>
-  <div class="userinfo">
+
+<header class="top-header">
+  <div class="brand-group">
+    <a href="/services" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
+      <img src="/static/images/Local_AWS_logo.png" alt="LocalAWS Logo" style="height:44px; width:auto; display:block; object-fit:contain;">
+      <div class="brand-wordmark">LocalAWS Console</div>
+    </a>
+  </div>
+  <div class="header-right">
+    <a href="/services" style="color:var(--text-muted); font-size:12px;"><i class="fa-solid fa-arrow-left"></i> Services</a>
     <div class="user-badge" id="userEmailBadge">Loading...</div>
-    <button onclick="logout()">Sign out</button>
+    <button class="btn-signout" onclick="logout()">Sign out</button>
   </div>
 </header>
 
+<div class="page-header">
+  <div class="page-title">
+    <i class="fa-solid fa-table-cells" style="color:var(--status-blue);"></i>
+    Amazon DynamoDB
+    <span class="count-badge" id="tableCountBadge">Loading...</span>
+  </div>
+</div>
+
 <main>
-  <!-- LEFT: Table List & Table Creator -->
-  <div>
-    <div class="panel" style="margin-bottom: 20px;">
-      <h2>Create Table</h2>
-      <label>Table Name</label>
-      <input type="text" id="newTableName" placeholder="e.g. users">
-      
-      <label>Partition Key (PK)</label>
-      <input type="text" id="newPK" placeholder="e.g. user_id">
-      
-      <label>Sort Key (SK, optional)</label>
-      <input type="text" id="newSK" placeholder="e.g. created_at">
-      
-      <button class="primary btn-full" onclick="createTable()">Create Table</button>
-      <div class="status" id="createStatus"></div>
+  <!-- LEFT PANEL: Create Table & Table List -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+    <div class="panel-card">
+      <div class="panel-header">
+        <span class="panel-title"><i class="fa-solid fa-plus-circle" style="color:var(--accent-orange);"></i> Create Table</span>
+      </div>
+      <div class="panel-body">
+        <label for="newTableName">Table Name</label>
+        <input type="text" id="newTableName" placeholder="e.g. users">
+        
+        <label for="newPK">Partition Key (PK)</label>
+        <input type="text" id="newPK" placeholder="e.g. user_id">
+        
+        <label for="newSK">Sort Key (SK, optional)</label>
+        <input type="text" id="newSK" placeholder="e.g. created_at">
+        
+        <button class="primary btn-full" onclick="createTable()"><i class="fa-solid fa-square-plus"></i> Create Table</button>
+        <div class="status" id="createStatus"></div>
+      </div>
     </div>
 
-    <div class="panel">
-      <h2>
-        <span>Tables</span>
-        <span id="tableCountBadge" style="font-size: 11px; color: var(--muted);"></span>
-      </h2>
+    <div class="panel-card">
+      <div class="panel-header">
+        <span class="panel-title"><i class="fa-solid fa-list-ul"></i> Tables</span>
+      </div>
       <div class="table-list" id="tableList">
         <div class="empty">Loading tables...</div>
       </div>
     </div>
   </div>
 
-  <!-- RIGHT: Selected Table Viewer -->
-  <div class="panel right-panel" id="rightPanel" style="display:none;">
+  <!-- RIGHT PANEL: Table Viewer -->
+  <div class="panel-card right-panel" id="rightPanel" style="display:none;">
     <div class="table-header">
       <div>
         <h2 class="table-title" id="tableTitle"></h2>
         <div class="meta-chips" id="tableMetaChips"></div>
       </div>
-      <button class="danger" onclick="deleteCurrentTable()">Delete Table</button>
+      <button class="danger" onclick="deleteCurrentTable()"><i class="fa-solid fa-trash"></i> Delete Table</button>
     </div>
 
     <div class="toolbar">
-      <button class="primary" onclick="openPutModal()">+ Put Item</button>
-      <input type="text" id="getKeyInput" placeholder="Enter partition key value...">
-      <button onclick="getItem()">Get Item</button>
-      <button onclick="scanItems()">Scan All</button>
+      <button class="primary" onclick="openPutModal()"><i class="fa-solid fa-plus"></i> Put Item</button>
+      <input type="text" id="getKeyInput" placeholder="Enter partition key value to query...">
+      <button onclick="getItem()"><i class="fa-solid fa-magnifying-glass"></i> Get Item</button>
+      <button onclick="scanItems()"><i class="fa-solid fa-rotate-right"></i> Scan All</button>
     </div>
 
     <div class="table-wrap">
@@ -412,11 +508,12 @@
     <div class="status" id="tableStatus"></div>
   </div>
 
-  <div class="panel right-panel" id="noTableSelectedPanel">
+  <!-- NO TABLE SELECTED PLACEHOLDER -->
+  <div class="panel-card right-panel" id="noTableSelectedPanel">
     <div class="empty" style="padding: 80px 20px;">
-      <div style="font-size: 28px; margin-bottom: 12px; color: var(--accent);">▤</div>
-      <h3 style="margin: 0 0 6px; font-size: 16px; color: var(--text);">No Table Selected</h3>
-      <p style="margin: 0; color: var(--muted);">Select a table from the left or create a new one to view and manage its items.</p>
+      <i class="fa-solid fa-table" style="font-size: 32px; color: var(--accent-orange); margin-bottom: 16px; display:block;"></i>
+      <h3 style="margin: 0 0 8px; font-size: 16px; color: #ffffff;">No Table Selected</h3>
+      <p style="margin: 0; color: var(--text-muted);">Select a table from the sidebar or create a new table to view and edit items.</p>
     </div>
   </div>
 </main>
@@ -424,14 +521,14 @@
 <!-- Put Item Modal -->
 <div class="modal-overlay" id="putModal">
   <div class="modal">
-    <h3>Put Item</h3>
-    <label>JSON Item Document</label>
+    <h3><i class="fa-solid fa-file-code" style="color:var(--accent-orange);"></i> Put Item</h3>
+    <label for="putItemJson">JSON Item Document</label>
     <textarea id="putItemJson" placeholder='{"user_id": "1", "name": "Alice"}'></textarea>
-    <div class="json-hint">Ensure the JSON document contains the table's partition key and optional sort key.</div>
+    <div class="json-hint"><i class="fa-solid fa-circle-info"></i> JSON document must include the table's partition key (and optional sort key).</div>
     <div class="status" id="putStatus"></div>
     <div class="modal-footer">
       <button onclick="closePutModal()">Cancel</button>
-      <button class="primary" onclick="putItem()">Save Item</button>
+      <button class="primary" onclick="putItem()"><i class="fa-solid fa-floppy-disk"></i> Save Item</button>
     </div>
   </div>
 </div>
@@ -479,17 +576,17 @@ async function loadTables() {
     const el = document.getElementById("tableList");
     const countBadge = document.getElementById("tableCountBadge");
     const tables = data.tables || [];
-    countBadge.textContent = `${tables.length} total`;
+    countBadge.textContent = `${tables.length} table${tables.length === 1 ? '' : 's'}`;
 
     if (tables.length === 0) {
-      el.innerHTML = `<div class="empty">No tables yet</div>`;
+      el.innerHTML = `<div class="empty">No tables created yet</div>`;
       return;
     }
 
     el.innerHTML = tables.map(t => `
       <div class="table-item ${t === currentTable ? 'active' : ''}" onclick="openTable('${t}')">
-        <span>▤ ${t}</span>
-        <span class="del" onclick="event.stopPropagation(); deleteTableByName('${t}')" title="Delete table">✕</span>
+        <span><i class="fa-solid fa-table" style="color:var(--accent-orange); margin-right:8px;"></i> ${t}</span>
+        <span class="del" onclick="event.stopPropagation(); deleteTableByName('${t}')" title="Delete table"><i class="fa-solid fa-trash"></i></span>
       </div>`).join("");
   } catch (err) {
     setStatus("createStatus", "Failed to connect to DynamoDB API", "error");
@@ -650,7 +747,7 @@ function renderItems(items) {
     return `<tr>
       ${cells}
       <td style="text-align:right;">
-        <button class="danger" style="padding: 4px 10px; font-size: 12px;" onclick="deleteItem('${encodeURIComponent(key)}')">Delete</button>
+        <button class="danger" style="padding: 3px 8px; font-size: 11px;" onclick="deleteItem('${encodeURIComponent(key)}')"><i class="fa-solid fa-trash"></i> Delete</button>
       </td>
     </tr>`;
   }).join("");

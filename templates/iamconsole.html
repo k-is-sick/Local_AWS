@@ -3,129 +3,182 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LocalAWS Console — IAM</title>
+<title>IAM Console — LocalAWS Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   :root {
-    --bg: #0e1117;
-    --panel: #161b22;
-    --panel-hover: #1f242c;
-    --border: #2a313c;
-    --text: #d6dde5;
-    --muted: #8b94a3;
-    --accent: #a371f7;
+    --bg-main: #0e1117;
+    --bg-surface: #161b22;
+    --bg-surface-hover: #1c2129;
+    --bg-card: #1f242d;
+    --border-default: #2e3745;
+    --border-subtle: #242b35;
+    --text-primary: #d6dde5;
+    --text-muted: #8b94a3;
     --accent-orange: #ff9900;
-    --danger: #e5534b;
-    --ok: #3fb950;
+    --accent-purple: #a371f7;
+    --status-green: #3fb950;
+    --status-red: #f85149;
+    --font-sans: 'IBM Plex Sans', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
   }
-  * { box-sizing: border-box; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.5;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
-  header {
-    padding: 14px 28px;
-    border-bottom: 1px solid var(--border);
+  a { color: inherit; text-decoration: none; }
+
+  /* TOP HEADER */
+  .top-header {
+    height: 48px;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-default);
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: var(--panel);
+    justify-content: space-between;
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
   }
-  .logo {
-    width: 32px;
-    height: 32px;
-    background: var(--accent);
-    border-radius: 6px;
+  .brand-group { display: flex; align-items: center; gap: 12px; }
+  .brand-logo {
+    width: 24px;
+    height: 24px;
+    background: var(--accent-purple);
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    color: #fff;
-    font-size: 12px;
-    letter-spacing: -0.5px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 11px;
+    color: #0e1117;
   }
-  header h1 {
-    font-size: 16px;
+  .brand-wordmark {
+    font-size: 14px;
     font-weight: 600;
-    margin: 0;
-    letter-spacing: -0.2px;
-  }
-  .nav-back {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13px;
-    margin-left: 12px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.15s;
-  }
-  .nav-back:hover {
-    color: var(--text);
-    background: rgba(255, 255, 255, 0.05);
-  }
-  .userinfo {
-    margin-left: auto;
+    color: #fff;
     display: flex;
     align-items: center;
-    gap: 14px;
-    font-size: 13px;
-    color: var(--muted);
+    gap: 8px;
   }
+  .header-right { display: flex; align-items: center; gap: 12px; }
   .user-badge {
-    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-primary);
     padding: 4px 10px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-size: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
   }
-  .userinfo button {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 6px 14px;
-    border-radius: 6px;
+  .btn-signout {
+    font-family: var(--font-sans);
     font-size: 12px;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border-default);
+    padding: 4px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.15s ease;
   }
-  .userinfo button:hover {
-    border-color: var(--accent);
-    color: #fff;
+  .btn-signout:hover {
+    color: #ffffff;
+    border-color: var(--accent-orange);
+    background: var(--bg-surface-hover);
   }
 
+  /* PAGE HEADER */
+  .page-header {
+    padding: 20px 32px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .page-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .iam-chip {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-purple);
+    background: rgba(163, 113, 247, 0.14);
+    border: 1px solid rgba(163, 113, 247, 0.35);
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+
+  /* MAIN LAYOUT */
   main {
-    max-width: 1200px;
-    margin: 28px auto;
-    padding: 0 24px;
+    flex: 1;
+    max-width: 1440px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px 32px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
   }
-  @media (max-width: 900px) {
+  @media (max-width: 1000px) {
     main { grid-template-columns: 1fr; }
   }
 
   .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
-  .panel h2 {
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--muted);
-    margin: 0;
+  .panel-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .panel h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .count-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    padding: 2px 8px;
+    border-radius: 4px;
   }
 
   .form-row {
@@ -135,55 +188,72 @@
   }
   input, select, textarea {
     padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
+    border-radius: 4px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
     font-size: 13px;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s ease;
   }
   input:focus, select:focus, textarea:focus {
     outline: none;
-    border-color: var(--accent);
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 0 1px var(--accent-orange);
   }
   input { flex: 1; }
   textarea {
     width: 100%;
-    height: 100px;
-    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    height: 120px;
+    font-family: var(--font-mono);
     font-size: 12px;
     resize: vertical;
+    line-height: 1.5;
   }
 
   button {
-    padding: 8px 14px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    color: var(--text);
-    background: var(--panel);
-    font-size: 13px;
+    font-family: var(--font-sans);
+    font-size: 12.5px;
     font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+    background: var(--bg-surface);
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.15s ease;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
-  button:hover { border-color: var(--accent); }
+  button:hover {
+    background: var(--bg-surface-hover);
+    border-color: var(--text-muted);
+  }
   button.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
+    background: var(--accent-orange);
+    border-color: var(--accent-orange);
+    color: #0e1117;
     font-weight: 600;
   }
-  button.primary:hover { opacity: 0.92; }
-  button.danger { color: var(--danger); }
-  button.danger:hover { border-color: var(--danger); background: rgba(229, 83, 75, 0.1); }
-  button.sm { padding: 3px 8px; font-size: 11px; }
+  button.primary:hover { background: #ffaa22; border-color: #ffaa22; }
+  button.danger {
+    color: var(--status-red);
+    border-color: rgba(248, 81, 73, 0.4);
+    background: transparent;
+  }
+  button.danger:hover {
+    background: rgba(248, 81, 73, 0.12);
+    border-color: var(--status-red);
+  }
+  button.sm { padding: 4px 10px; font-size: 11.5px; }
 
   .table-wrap {
     overflow-x: auto;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-default);
     border-radius: 6px;
-    background: var(--bg);
+    background: var(--bg-surface);
   }
   table {
     width: 100%;
@@ -192,45 +262,47 @@
   }
   th {
     text-align: left;
-    font-size: 11px;
+    font-size: 11.5px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .05em;
-    color: var(--muted);
-    padding: 9px 12px;
-    background: rgba(255,255,255,0.02);
-    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 10px 14px;
+    background: #12161d;
+    border-bottom: 1px solid var(--border-default);
   }
   td {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-subtle);
     vertical-align: top;
   }
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,0.02); }
+  tr:hover td { background: var(--bg-surface-hover); }
 
   .key-chip {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border);
+    background: var(--bg-main);
+    border: 1px solid var(--border-subtle);
     padding: 2px 6px;
-    border-radius: 4px;
-    font-family: monospace;
+    border-radius: 2px;
+    font-family: var(--font-mono);
     font-size: 11px;
     margin-bottom: 4px;
   }
-  .key-active { border-color: rgba(63, 185, 80, 0.4); color: #3fb950; }
-  .key-inactive { color: var(--muted); }
+  .key-active { border-color: rgba(63, 185, 80, 0.4); color: var(--status-green); }
+  .key-inactive { color: var(--text-muted); }
 
   .policy-doc {
-    font-family: monospace;
+    font-family: var(--font-mono);
     font-size: 11px;
-    color: var(--muted);
-    background: var(--panel);
-    padding: 6px 8px;
+    color: var(--text-primary);
+    background: var(--bg-main);
+    border: 1px solid var(--border-subtle);
+    padding: 8px 10px;
     border-radius: 4px;
-    max-height: 90px;
+    max-height: 100px;
     overflow-y: auto;
     margin: 0;
     white-space: pre-wrap;
@@ -243,71 +315,96 @@
     align-items: center;
     flex-wrap: wrap;
     font-size: 12px;
-    color: var(--muted);
+    color: var(--text-muted);
   }
 
   .status {
+    font-family: var(--font-mono);
     font-size: 12px;
-    min-height: 18px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    min-height: 16px;
   }
-  .status.ok { color: var(--ok); }
-  .status.error { color: var(--danger); }
+  .status.ok {
+    color: var(--status-green);
+    background: rgba(63, 185, 80, 0.1);
+    border: 1px solid rgba(63, 185, 80, 0.25);
+  }
+  .status.error {
+    color: var(--status-red);
+    background: rgba(248, 81, 73, 0.1);
+    border: 1px solid rgba(248, 81, 73, 0.25);
+  }
 
+  /* MODAL */
   .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.65);
+    background: rgba(6, 9, 13, 0.8);
     backdrop-filter: blur(2px);
     align-items: center;
     justify-content: center;
-    z-index: 50;
+    z-index: 100;
   }
   .modal-overlay.open { display: flex; }
   .modal {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    width: 480px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    width: 500px;
     max-width: 90vw;
     padding: 24px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.6);
   }
   .secret-box {
-    background: rgba(255, 153, 0, 0.1);
-    border: 1px solid rgba(255, 153, 0, 0.4);
-    padding: 12px;
-    border-radius: 6px;
-    font-family: monospace;
+    background: rgba(255, 153, 0, 0.08);
+    border: 1px solid rgba(255, 153, 0, 0.3);
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
     font-size: 12px;
     word-break: break-all;
-    margin: 12px 0;
-    color: #ffb84d;
+    margin: 8px 0 16px;
+    color: var(--accent-orange);
   }
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">IAM</div>
-  <h1>LocalAWS Console — IAM</h1>
-  <a class="nav-back" href="http://localhost:4566/services">← Services</a>
-  <div class="userinfo">
+
+<header class="top-header">
+  <div class="brand-group">
+    <a href="/services" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
+      <img src="/static/images/Local_AWS_logo.png" alt="LocalAWS Logo" style="height:44px; width:auto; display:block; object-fit:contain;">
+      <div class="brand-wordmark">LocalAWS Console</div>
+    </a>
+  </div>
+  <div class="header-right">
+    <a href="/services" style="color:var(--text-muted); font-size:12px;"><i class="fa-solid fa-arrow-left"></i> Services</a>
     <div class="user-badge" id="userEmailBadge">Identity & Access</div>
-    <button onclick="logout()">Sign out</button>
+    <button class="btn-signout" onclick="logout()">Sign out</button>
   </div>
 </header>
+
+<div class="page-header">
+  <div class="page-title">
+    <i class="fa-solid fa-user-shield" style="color:var(--accent-purple);"></i>
+    Identity & Access Management (IAM)
+    <span class="iam-chip">iam.local</span>
+  </div>
+</div>
 
 <main>
   <!-- LEFT: Users & Access Keys -->
   <div class="panel">
-    <h2>
-      <span>Users & Access Keys</span>
-      <span id="userCountBadge" style="font-size: 11px; color: var(--muted);"></span>
-    </h2>
+    <div class="panel-header">
+      <h2><i class="fa-solid fa-users"></i> Users & Access Keys</h2>
+      <span id="userCountBadge" class="count-badge">Loading...</span>
+    </div>
 
     <div class="form-row">
       <input type="text" id="newUsername" placeholder="Enter IAM username (e.g. developer)">
-      <button class="primary" onclick="createUser()">+ Create User</button>
+      <button class="primary" onclick="createUser()"><i class="fa-solid fa-user-plus"></i> Create User</button>
     </div>
     <div class="status" id="userStatus"></div>
 
@@ -322,7 +419,7 @@
           </tr>
         </thead>
         <tbody id="usersBody">
-          <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Loading users...</td></tr>
+          <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:24px;">Loading users...</td></tr>
         </tbody>
       </table>
     </div>
@@ -330,10 +427,10 @@
 
   <!-- RIGHT: Policies -->
   <div class="panel">
-    <h2>
-      <span>Policies</span>
-      <span id="policyCountBadge" style="font-size: 11px; color: var(--muted);"></span>
-    </h2>
+    <div class="panel-header">
+      <h2><i class="fa-solid fa-file-shield"></i> IAM Policies</h2>
+      <span id="policyCountBadge" class="count-badge">Loading...</span>
+    </div>
 
     <div class="preset-bar">
       <span>Templates:</span>
@@ -347,10 +444,10 @@
 
     <input type="text" id="policyName" placeholder="Policy Name (e.g. S3FullAccess)">
     <textarea id="policyDoc" placeholder='{"Version":"2026-01-01","Statement":[{"Effect":"Allow","Action":["*"],"Resource":["*"]}]}'></textarea>
-    <div style="font-size:11px;color:var(--muted);margin-top:-10px;">
+    <div style="font-size:11px;color:var(--text-muted);margin-top:-6px;">
       Action hints: 
-      <span style="font-family:monospace;">
-        <select id="actionHint" style="font-size:11px;padding:2px 4px;" onchange="insertAction(this.value)">
+      <span>
+        <select id="actionHint" style="font-size:11px;padding:2px 6px;" onchange="insertAction(this.value)">
           <option value="">— pick an action —</option>
           <optgroup label="S3">
             <option>s3:CreateBucket</option><option>s3:DeleteBucket</option>
@@ -382,7 +479,7 @@
     </div>
     
     <div style="display:flex;justify-content:flex-end;">
-      <button class="primary" onclick="createPolicy()">+ Create Policy</button>
+      <button class="primary" onclick="createPolicy()"><i class="fa-solid fa-plus"></i> Create Policy</button>
     </div>
     <div class="status" id="policyStatus"></div>
 
@@ -396,7 +493,7 @@
           </tr>
         </thead>
         <tbody id="policiesBody">
-          <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px;">Loading policies...</td></tr>
+          <tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:24px;">Loading policies...</td></tr>
         </tbody>
       </table>
     </div>
@@ -406,13 +503,13 @@
 <!-- Key Created Modal -->
 <div class="modal-overlay" id="keyModal">
   <div class="modal">
-    <h3 style="margin:0 0 10px;font-size:16px;color:#3fb950;">✔ Access Key Generated</h3>
-    <p style="font-size:13px;color:var(--muted);margin:0 0 10px;">Save these credentials now. The secret access key will not be shown again.</p>
+    <h3 style="margin:0 0 10px;font-size:16px;color:var(--status-green);"><i class="fa-solid fa-circle-check"></i> Access Key Generated</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin:0 0 14px;">Save these credentials now. The secret access key will not be shown again.</p>
     
-    <label style="font-size:11px;color:var(--muted);">Access Key ID</label>
+    <label style="font-size:11px;">Access Key ID</label>
     <div class="secret-box" id="modalAkid"></div>
 
-    <label style="font-size:11px;color:var(--muted);">Secret Access Key</label>
+    <label style="font-size:11px;">Secret Access Key</label>
     <div class="secret-box" id="modalSecret"></div>
 
     <div style="display:flex;justify-content:flex-end;margin-top:16px;">
@@ -485,7 +582,6 @@ function setPolicyTemplate(type) {
 function insertAction(val) {
   if (!val) return;
   const ta = document.getElementById("policyDoc");
-  // If the textarea already has valid JSON with an Action array, append to it
   try {
     const doc = JSON.parse(ta.value);
     const stmt = doc.Statement && doc.Statement[0];
@@ -496,7 +592,6 @@ function insertAction(val) {
       return;
     }
   } catch (e) {}
-  // Fallback: just set a starter doc
   document.getElementById("policyDoc").value = JSON.stringify({
     Version: "2026-01-01",
     Statement: [{ Effect: "Allow", Action: [val], Resource: ["*"] }]
@@ -538,7 +633,7 @@ async function loadUserInfo() {
 
 async function logout() {
   await fetch("/api/logout", { method: "POST", credentials: "include" });
-  window.location.href = "http://localhost:4566/";
+  window.location.href = "/";
 }
 
 async function loadUsers() {
@@ -547,13 +642,13 @@ async function loadUsers() {
   const countBadge = document.getElementById('userCountBadge');
   
   if (users.error || !Array.isArray(users)) {
-    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--danger);padding:18px;">${users.error || "Could not load users"}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--status-red);padding:18px;">${users.error || "Could not load users"}</td></tr>`;
     return;
   }
 
   countBadge.textContent = `${users.length} total`;
   if (users.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">No users created yet.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:24px;">No users created yet.</td></tr>`;
     return;
   }
 
@@ -566,7 +661,7 @@ async function loadUsers() {
     const keyList = Array.isArray(keys) ? keys : [];
     
     const keyHtml = keyList.length === 0
-      ? `<span style="color:var(--muted);font-size:12px;">No keys</span>`
+      ? `<span style="color:var(--text-muted);font-size:12px;">No keys</span>`
       : keyList.map(k => `
           <div class="key-chip ${k.active ? 'key-active' : 'key-inactive'}">
             <span>${k.access_key_id}</span>
@@ -577,12 +672,12 @@ async function loadUsers() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>
-        <strong style="color:var(--text);">${u.username}</strong>
-        <div style="font-size:11px;color:var(--muted);">ID: ${u.id}</div>
+        <strong style="color:var(--text-primary);">${u.username}</strong>
+        <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">ID: ${u.id}</div>
       </td>
       <td>
         ${keyHtml}
-        <div><button class="sm" onclick="createKey(${u.id})">+ Generate Key</button></div>
+        <div><button class="sm" onclick="createKey(${u.id})"><i class="fa-solid fa-key"></i> Key</button></div>
       </td>
       <td>
         ${policyList.length > 0 ? `
@@ -590,10 +685,10 @@ async function loadUsers() {
             <select id="policySel${u.id}" style="padding:4px 6px;font-size:12px;">${policyOptions}</select>
             <button class="sm" onclick="attachPolicy(${u.id})">Attach</button>
           </div>
-        ` : `<span style="color:var(--muted);font-size:12px;">No policies available</span>`}
+        ` : `<span style="color:var(--text-muted);font-size:12px;">No policies available</span>`}
       </td>
       <td style="text-align:right;">
-        <button class="danger sm" onclick="deleteUser(${u.id}, '${u.username}')">Delete</button>
+        <button class="danger sm" onclick="deleteUser(${u.id}, '${u.username}')"><i class="fa-solid fa-trash"></i></button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -606,13 +701,13 @@ async function loadPolicies() {
   const countBadge = document.getElementById('policyCountBadge');
 
   if (policies.error || !Array.isArray(policies)) {
-    tbody.innerHTML = `<tr><td colspan="3" style="color:var(--danger);padding:18px;">${policies.error || "Could not load policies"}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="3" style="color:var(--status-red);padding:18px;">${policies.error || "Could not load policies"}</td></tr>`;
     return;
   }
 
   countBadge.textContent = `${policies.length} total`;
   if (policies.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px;">No policies created yet. Use a template above.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:24px;">No policies created yet. Use a template above.</td></tr>`;
     return;
   }
 
@@ -623,7 +718,7 @@ async function loadPolicies() {
       <td><strong>${p.name}</strong></td>
       <td><pre class="policy-doc">${JSON.stringify(p.document, null, 2)}</pre></td>
       <td style="text-align:right;">
-        <button class="danger sm" onclick="deletePolicy(${p.id}, '${p.name}')">Delete</button>
+        <button class="danger sm" onclick="deletePolicy(${p.id}, '${p.name}')"><i class="fa-solid fa-trash"></i></button>
       </td>
     `;
     tbody.appendChild(tr);

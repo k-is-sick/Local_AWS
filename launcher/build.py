@@ -21,8 +21,12 @@ def build():
         ("iam", "iam"),
         ("lambda", "lambda"),
         ("templates", "templates"),
+        ("static", "static"),
+        ("launcher", "launcher"),
         ("shared", "shared")
     ]
+
+    ico_path = os.path.join(root_dir, "launcher", "logo.ico")
 
     cmd = [
         "pyinstaller",
@@ -31,6 +35,7 @@ def build():
         "--onefile",
         "--noconsole",
         "--clean",
+        f"--icon={ico_path}",
         f"--distpath={dist_dir}",
         f"--workpath={work_dir}"
     ]
